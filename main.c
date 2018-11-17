@@ -13,46 +13,49 @@
 #include "types.h"
 #include <stdio.h>
 
+void FillTextureArray(int count, Texture2D * text)
+{
+    const char * strings[] = {"images/empty.png", "images/one.png", "images/two.png", "images/three.png", 
+                            "images/four.png", "images/five.png", "images/six.png", "images/seven.png", 
+                            "images/eight.png", "images/bomb.png","images/flag.png"};
+    for(int i = 0; i < count;i++)
+    {
+        text[i] = LoadTexture(strings[i]);
+    }
+}
+
 int main()
 {
     int screenWidth = 800;
     int screenHeight = 450;
     
+    int boardHeight = 9;
+    int boardWidth = 9;
+    
     InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
     
-    /*
-    Texture2D one = LoadTexture("images/one.png");
-    Texture2D two = LoadTexture("images/two.png");
-    Texture2D three = LoadTexture("images/three.png");
-    Texture2D four = LoadTexture("images/four.png");
-    Texture2D five = LoadTexture("images/five.png");
-    Texture2D six = LoadTexture("images/six.png");
-    Texture2D seven = LoadTexture("images/seven.png");
-    Texture2D eight = LoadTexture("images/eight.png");
-    Texture2D empty = LoadTexture("images/empty.png");
-    Texture2D bomb = LoadTexture("images/bomb.png");
-    Texture2D flag = LoadTexture("images/flag.png");
+    Rectangle tiles[boardWidth][boardHeight];
+    bool collided[boardWidth][boardHeight];
     
-    Board hiddenBoard;
-    Board shownBoard;
-    */
+    //Texture2D bomb = LoadTexture("images/bomb.png");
     
-    Texture2D bomb = LoadTexture("images/bomb.png");
+    int textureCount = 11;
+    Texture2D * textures = malloc(textureCount*sizeof(Texture2D));
+    FillTextureArray(textureCount, textures);
     
-    Rectangle recArray[16][16];
-    bool collided[16][16];
+    
     
     int xStart = 15;
     int yStart = 40;
     
-    for(int i = 0;i < 16;i++)
+    for(int i = 0;i < boardWidth;i++)
     {
-        for(int j = 0;j < 16;j++)
+        for(int j = 0;j < boardHeight;j++)
         {
-            recArray[i][j].x = xStart;
-            recArray[i][j].y = yStart;
-            recArray[i][j].width = 15;
-            recArray[i][j].height = 15;
+            tiles[i][j].x = xStart;
+            tiles[i][j].y = yStart;
+            tiles[i][j].width = 15;
+            tiles[i][j].height = 15;
             xStart+=15;
         }
         xStart = 15;
@@ -60,9 +63,9 @@ int main()
     }
     
     
-    for(int i = 0;i < 16;i++)
+    for(int i = 0;i < boardWidth;i++)
     {
-        for(int j = 0;j < 16;j++)
+        for(int j = 0;j < boardHeight;j++)
         {
             collided[i][j] = false;
         }
@@ -70,17 +73,18 @@ int main()
     
     Vector2 mousePoint;
     
-    SetTargetFPS(60);
+    SetTargetFPS(10);
     
     while (!WindowShouldClose())
     {
+        
         mousePoint = GetMousePosition();
         
-        for(int i = 0;i<16;i++)
+        for(int i = 0;i < boardWidth;i++)
         {
-            for(int j = 0;j<16;j++)
+            for(int j = 0;j < boardHeight;j++)
             {
-                if(CheckCollisionPointRec(mousePoint, recArray[i][j]))
+                if(CheckCollisionPointRec(mousePoint, tiles[i][j]))
                 {
                     if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
                     {
@@ -94,35 +98,34 @@ int main()
 
         ClearBackground(RAYWHITE);
         
-        for(int i = 0;i<16;i++)
+        for(int i = 0;i<boardWidth;i++)
         {
-            for(int j = 0;j<16;j++)
+            for(int j = 0;j<boardHeight;j++)
             {
                 if(collided[i][j] == false)
                 {
-                    DrawRectangleRec(recArray[i][j], GRAY);
+                    DrawRectangleRec(tiles[i][j], GRAY);
                 }
                 else
                 {
-                    DrawRectangleRec(recArray[i][j], WHITE);
+                    DrawRectangleRec(tiles[i][j], WHITE);
                 }
             }
         }
         
-        for(int i = 0;i<16;i++)
+        for(int i = 0;i<boardWidth;i++)
         {
-            for(int j = 0;j<16;j++)
+            for(int j = 0;j<boardHeight;j++)
             {
                 if(collided[i][j] == true)
                 {
-                    DrawTexture(bomb,recArray[i][j].x + 1,recArray[i][j].y + 1, WHITE);
+                    DrawTexture(textures[0],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                 }
             }
         }
         
         EndDrawing();
-    } 
-    
+    }
     CloseWindow();
     
     return 0;

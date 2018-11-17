@@ -1,13 +1,8 @@
-/*******************************************************************************************
-*
-*   raylib [core] example - basic window
-*
-*   This example has been created using raylib 1.0 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
-*
-*   Copyright (c) 2013-2016 Ramon Santamaria (@raysan5)
-*
-********************************************************************************************/
+//
+//  main.c
+//
+//  Created by Jordan Wheeler
+//
 
 #include "raylib.h"
 #include "types.h"
@@ -26,8 +21,8 @@ void FillTextureArray(int count, Texture2D * text)
 
 int main()
 {
-    int screenWidth = 800;
-    int screenHeight = 450;
+    int screenWidth = 165;
+    int screenHeight = 190;
     
     int boardHeight = 9;
     int boardWidth = 9;

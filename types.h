@@ -1,3 +1,9 @@
+//
+//  types.c
+//
+//  Created by Jordan Wheeler
+//
+
 #ifndef types_h
 #define types_h
 

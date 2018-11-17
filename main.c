@@ -10,6 +10,8 @@
 ********************************************************************************************/
 
 #include "raylib.h"
+//#include "types.h"
+#include <stdio.h>
 
 int main()
 {
@@ -26,11 +28,6 @@ int main()
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        // Update
-        //----------------------------------------------------------------------------------
-        // TODO: Update your variables here
-        //----------------------------------------------------------------------------------
-
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
@@ -46,6 +43,14 @@ int main()
     // De-Initialization
     //--------------------------------------------------------------------------------------   
     CloseWindow();        // Close window and OpenGL context
+    bool x = false;
+    if(x)
+    {
+        printf("Bool is True");
+    }
+    else{
+        printf("Bool is False");
+    }
     //--------------------------------------------------------------------------------------
 
     return 0;

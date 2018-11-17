@@ -21,8 +21,8 @@ void FillTextureArray(int count, Texture2D * text)
 
 int main()
 {
-    int screenWidth = 165;
-    int screenHeight = 190;
+    int screenWidth = 174;
+    int screenHeight = 199;
     
     int boardHeight = 9;
     int boardWidth = 9;
@@ -32,13 +32,9 @@ int main()
     Rectangle tiles[boardWidth][boardHeight];
     bool collided[boardWidth][boardHeight];
     
-    //Texture2D bomb = LoadTexture("images/bomb.png");
-    
     int textureCount = 11;
     Texture2D * textures = malloc(textureCount*sizeof(Texture2D));
     FillTextureArray(textureCount, textures);
-    
-    
     
     int xStart = 15;
     int yStart = 40;
@@ -51,12 +47,11 @@ int main()
             tiles[i][j].y = yStart;
             tiles[i][j].width = 15;
             tiles[i][j].height = 15;
-            xStart+=15;
+            xStart+=16;
         }
         xStart = 15;
-        yStart+=15;
+        yStart+=16;
     }
-    
     
     for(int i = 0;i < boardWidth;i++)
     {
@@ -66,24 +61,28 @@ int main()
         }
     }
     
-    Vector2 mousePoint;
+    Vector2 mouseLocation;
     
-    SetTargetFPS(10);
+    SetTargetFPS(30);
     
+    // Renews the display continuously until the program is closed or Esc key is pressed.
     while (!WindowShouldClose())
     {
-        
-        mousePoint = GetMousePosition();
+        mouseLocation = GetMousePosition();
         
         for(int i = 0;i < boardWidth;i++)
         {
             for(int j = 0;j < boardHeight;j++)
             {
-                if(CheckCollisionPointRec(mousePoint, tiles[i][j]))
+                if(CheckCollisionPointRec(mouseLocation, tiles[i][j]))
                 {
                     if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
                     {
                         collided[i][j] = true;
+                    }
+                    else if(IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
+                    {
+                        collided[i][j] = false;
                     }
                 }
             }

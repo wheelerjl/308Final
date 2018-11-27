@@ -12,7 +12,7 @@ void FillTextureArray(int count, Texture2D * text)
 {
     const char * strings[] = {"images/empty.png", "images/one.png", "images/two.png", "images/three.png", 
                             "images/four.png", "images/five.png", "images/six.png", "images/seven.png", 
-                            "images/eight.png", "images/bomb.png","images/flag.png"};
+                            "images/eight.png", "images/bomb.png","images/flag.png","images/PowerDown.png","images/PowerUp.png"};
     for(int i = 0; i < count;i++)
     {
         text[i] = LoadTexture(strings[i]);
@@ -134,7 +134,7 @@ int main()
     Rectangle tiles[boardWidth][boardHeight];
     bool collided[boardWidth][boardHeight];
     
-    int textureCount = 11;
+    int textureCount = 13;
     Texture2D * textures = malloc(textureCount*sizeof(Texture2D));
     FillTextureArray(textureCount, textures);
     

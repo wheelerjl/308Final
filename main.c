@@ -74,8 +74,8 @@ void FillBoard(Board * b) {
                         }
                     }
                 }
+                b->elements[i][j] = count;
             }
-            b->elements[i][j] = count;
         }
     }
 }
@@ -243,13 +243,13 @@ int main()
                         DrawTexture(textures[9],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }
                     else if(board->elements[i][j] == POWERUP) {
-                        DrawTexture(textures[1],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
+                        DrawTexture(textures[12],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }
                     else if(board->elements[i][j] == POWERDOWN) {
-                        DrawTexture(textures[2],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
+                        DrawTexture(textures[11],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }
-                    else {
-                        DrawTexture(textures[0],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
+                    else{
+                        DrawTexture(textures[board->elements[i][j]],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }
                 }
             }

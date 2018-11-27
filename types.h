@@ -7,11 +7,6 @@
 #ifndef types_h
 #define types_h
 
-
-typedef struct {
-   int elements[16][16];
-} Board;
-
 typedef enum 
 {
     EMPTY,
@@ -28,5 +23,9 @@ typedef enum
     POWERUP,
     POWERDOWN
 } piece;
+
+typedef struct {
+   piece elements[9][9];
+} Board;
 
 #endif /* types_h */

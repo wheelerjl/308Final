@@ -19,6 +19,67 @@ void FillTextureArray(int count, Texture2D * text)
     }
 }
 
+void FillBoard(Board * b) {
+    for(int i = 0; i < 9; i++) {
+        for(int j = 0; j < 9; j++) {
+            if(b->elements[i][j] != BOMB && b->elements[i][j] != POWERUP && b->elements[i][j] != POWERDOWN) {
+                int count = 0;
+                //Checking top row
+                if(j > 0) {
+                    //Checking top left 
+                    if(i > 0) {
+                        if(b->elements[i - 1][j - 1] == BOMB) {
+                            count++;
+                        }
+                    }
+                    //Checking top middle
+                    if(b->elements[i][j - 1] == BOMB) {
+                        count++;
+                    }
+                    //Checking top right
+                    if(i < 8) {
+                        if(b->elements[i + 1][j - 1] == BOMB) {
+                            count++;
+                        }
+                    }
+                }
+                //Checking middle left 
+                if(i > 0) {
+                    if(b->elements[i - 1][j] == BOMB) {
+                        count++;
+                    }
+                }
+                //Checking middle right 
+                if(i < 8) {
+                    if(b->elements[i + 1][j] == BOMB) {
+                        count++;
+                    }
+                }
+                //Checking bottom 
+                if(j < 8) {
+                    if(i > 0) {
+                        //Checking bottom left 
+                        if(b->elements[i - 1][j + 1] == BOMB) {
+                            count++;
+                        }
+                    }
+                    //Checking bottom middle
+                    if(b->elements[i][j + 1] == BOMB) {
+                        count++;
+                    }
+                    //Checking bottom right 
+                    if(i < 8) {
+                        if(b->elements[i + 1][j + 1] == BOMB) {
+                            count++;
+                        }
+                    }
+                }
+            }
+            b->elements[i][j] = count;
+        }
+    }
+}
+
 void RandomizeBoard(Board * b, int i, int j) {
     int bombCount = 10;
     int upCount = 5;
@@ -56,6 +117,8 @@ void RandomizeBoard(Board * b, int i, int j) {
             downCount--;
         }
     }
+    
+    FillBoard(b);
 }
 
 int main()

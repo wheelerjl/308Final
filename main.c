@@ -121,6 +121,21 @@ void RandomizeBoard(Board * b, int i, int j) {
     FillBoard(b);
 }
 
+void ApplyPowerUp(bool **col, Board * board, Board * flags) {
+    for(int i = 0; i < 8; i++) {
+        for(int j = 0; j < 8; j++) {
+            if(board->elements[i][j] == BOMB && flags->elements[i][j] == EMPTY) {
+                col[i][j] = true;
+                flags->elements[i][j] = FLAG;
+            }
+        }
+    }
+}
+
+void ApplyPowerDown() {
+    
+}
+
 int main()
 {
     int screenWidth = 174;
@@ -170,14 +185,18 @@ int main()
     //Allocate memory for Board 
 	Board * board = malloc(sizeof(piece[9][9]));
     
+    Board * flags = malloc(sizeof(piece[9][9]));
+    
     //Fill board with empty spaces
     for(int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
+            board->elements[i][j] = EMPTY;
             board->elements[i][j] = EMPTY;
         }
     }
     
     bool firstClick = true;
+    bool bombClicked = false;
     
     // Renews the display continuously until the program is closed or Esc key is pressed.
     while (!WindowShouldClose())
@@ -190,7 +209,7 @@ int main()
             {
                 if(CheckCollisionPointRec(mouseLocation, tiles[i][j]))
                 {
-                    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+                    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && bombClicked == false)
                     {
                         if(firstClick) {
                             RandomizeBoard(board, i, j);
@@ -198,14 +217,15 @@ int main()
                         }
                         collided[i][j] = true;
                     }
-                    else if(IsMouseButtonPressed(MOUSE_RIGHT_BUTTON))
+                    else if(IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) && bombClicked == false)
                     {
-                        collided[i][j] = false;
-                        //Test codes
-                        for(int a = 0; a < 9; a++) {
-                            for(int b = 0; b < 9; b++) {
-                                collided[a][b] = true;
-                            }
+                        if(flags->elements[i][j] == EMPTY) {
+                            flags->elements[i][j] = FLAG;
+                            collided[i][j] = true;
+                        }
+                        else {
+                            flags->elements[i][j] = EMPTY;
+                            collided[i][j] = false;
                         }
                     }
                 }
@@ -239,8 +259,10 @@ int main()
             {
                 if(collided[i][j] == true)
                 {
-                    if(board->elements[i][j] == BOMB){
+                    if(board->elements[i][j] == BOMB && flags->elements[i][j] != FLAG){
                         DrawTexture(textures[9],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
+                        DrawText("You hit a bomb, you lose. \nGit gud.", 0, 0, 12, BLACK);
+                        bombClicked = true;
                     }
                     else if(board->elements[i][j] == POWERUP) {
                         DrawTexture(textures[12],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
@@ -250,6 +272,10 @@ int main()
                     }
                     else{
                         DrawTexture(textures[board->elements[i][j]],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
+                    }
+                    
+                    if (flags->elements[i][j] == FLAG) {
+                        DrawTexture(textures[10],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }
                 }
             }

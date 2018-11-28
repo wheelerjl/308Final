@@ -275,6 +275,14 @@ int main()
                             RandomizeBoard(board, i, j);
                             firstClick = false;
                         }
+                        if(collided[i][j] == false) {
+                            if(board->elements[i][j] == POWERUP) {
+                                ApplyPowerUp();
+                            }
+                            else if(board->elements[i][j] == POWERDOWN) {
+                                ApplyPowerDown();
+                            }
+                        }
                         collided[i][j] = true;
                         CheckSurroundingSpaces(i, j, collided, board);
                     }

@@ -132,8 +132,68 @@ void ApplyPowerUp(bool **col, Board * board, Board * flags) {
     }
 }
 
-void ApplyPowerDown() {
+void ApplyPowerDown(bool **col, Board * board, Board * flags) {
+    int x = GetRandomValue(0, 8);
+    int y = GetRandomValue(0, 8);
     
+    //if() {
+        //b->elements[x][y] = BOMB;
+        //bombCount--;
+    //}
+}
+
+void CheckSurroundingSpaces(int i, int j, bool col[][9], Board * b) {
+    
+    //Checking top row
+    if(j > 0) {
+        //Checking top left 
+        if(i > 0) {
+            if((b->elements[i - 1][j - 1] != BOMB) && (b->elements[i - 1][j - 1] != POWERUP) && (b->elements[i - 1][j - 1] != POWERDOWN)) {
+                col[i - 1][j - 1] = true;
+            }
+        }
+        //Checking top middle
+        if((b->elements[i][j - 1] != BOMB) && (b->elements[i][j - 1] != POWERUP) && (b->elements[i][j - 1] != POWERDOWN)) {
+            col[i][j - 1] = true;
+        }
+        //Checking top right
+        if(i < 8) {
+            if((b->elements[i + 1][j - 1] != BOMB) && (b->elements[i + 1][j - 1] != POWERUP) && (b->elements[i + 1][j - 1] != POWERDOWN)) {
+                col[i + 1][j - 1] = true;
+            }
+        }
+    }
+    //Checking middle left 
+    if(i > 0) {
+        if((b->elements[i - 1][j] != BOMB) && (b->elements[i - 1][j] != POWERUP) && (b->elements[i - 1][j] != POWERDOWN)) {
+            col[i - 1][j] = true;
+        }
+    }
+    //Checking middle right 
+    if(i < 8) {
+        if((b->elements[i + 1][j] != BOMB) && (b->elements[i + 1][j] != POWERUP) && (b->elements[i + 1][j] != POWERDOWN)) {
+            col[i + 1][j] = true;
+        }
+    }
+    //Checking bottom 
+    if(j < 8) {
+        if(i > 0) {
+            //Checking bottom left 
+            if((b->elements[i - 1][j + 1] != BOMB) && (b->elements[i - 1][j + 1] != POWERUP) && (b->elements[i - 1][j] != POWERDOWN)) {
+                col[i - 1][j + 1] = true;
+            }
+        }
+        //Checking bottom middle
+        if((b->elements[i][j + 1] != BOMB) && (b->elements[i][j + 1] != POWERUP) && (b->elements[i][j] != POWERDOWN)) {
+            col[i][j + 1] = true;
+        }
+        //Checking bottom right 
+        if(i < 8) {
+            if((b->elements[i + 1][j + 1] != BOMB) && (b->elements[i + 1][j + 1] != POWERUP) && (b->elements[i + 1][j] != POWERDOWN)) {
+                col[i + 1][j + 1] = true;
+            }
+        }
+    }
 }
 
 int main()
@@ -216,6 +276,7 @@ int main()
                             firstClick = false;
                         }
                         collided[i][j] = true;
+                        CheckSurroundingSpaces(i, j, collided, board);
                     }
                     else if(IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) && bombClicked == false)
                     {

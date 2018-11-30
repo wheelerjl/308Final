@@ -204,7 +204,7 @@ void CheckSurroundingSpaces(int i, int j, bool col[BOARDSIZE][BOARDSIZE], Board 
 void AddTiles(Rectangle tiles[BOARDSIZE][BOARDSIZE]) {
     
     int xStart = 15;
-    int yStart = 40;
+    int yStart = 15;
     
     for(int i = 0;i < BOARDSIZE;i++)
     {
@@ -223,7 +223,7 @@ void AddTiles(Rectangle tiles[BOARDSIZE][BOARDSIZE]) {
 
 int GetInitialSize() {
     int screenWidth = 153;
-    int screenHeight = 40;
+    int screenHeight = 100;
     
     Rectangle buttons[3];
     int xButtonStart = 5;
@@ -269,6 +269,8 @@ int GetInitialSize() {
             DrawTexture(textures[13+i],buttons[i].x, buttons[i].y,WHITE);
         }
         
+        DrawText("Choose an Option then\n close the window.", 15, screenHeight-50, 12, BLACK);
+        
         if(CheckCollisionPointRec(mouseLocation, buttons[0]))
         {
             if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
@@ -310,7 +312,7 @@ int main() {
     GetInitialSize();
     
     int screenWidth = (16*BOARDSIZE)+30;
-    int screenHeight = (16*BOARDSIZE)+100;
+    int screenHeight = (16*BOARDSIZE)+80;
     
     InitWindow(screenWidth, screenHeight, "Spiked Ball Sweeper");
     

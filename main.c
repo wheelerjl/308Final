@@ -7,12 +7,18 @@
 #include "raylib.h"
 #include "types.h"
 #include <stdio.h>
+#include <stdlib.h>
+
+int BOARDSIZE = 9;
+int BOMBAMOUNT = 10;
+int POWERAMOUNT = 2;
 
 void FillTextureArray(int count, Texture2D * text)
 {
     const char * strings[] = {"images/empty.png", "images/one.png", "images/two.png", "images/three.png", 
                             "images/four.png", "images/five.png", "images/six.png", "images/seven.png", 
-                            "images/eight.png", "images/bomb.png","images/flag.png","images/PowerDown.png","images/PowerUp.png"};
+                            "images/eight.png", "images/bomb.png","images/flag.png","images/PowerDown.png",
+                            "images/PowerUp.png","images/easy.png", "images/medium.png", "images/hard.png" };
     for(int i = 0; i < count;i++)
     {
         text[i] = LoadTexture(strings[i]);
@@ -20,8 +26,8 @@ void FillTextureArray(int count, Texture2D * text)
 }
 
 void FillBoard(Board * b) {
-    for(int i = 0; i < 9; i++) {
-        for(int j = 0; j < 9; j++) {
+    for(int i = 0; i < BOARDSIZE; i++) {
+        for(int j = 0; j < BOARDSIZE; j++) {
             if(b->elements[i][j] != BOMB && b->elements[i][j] != POWERUP && b->elements[i][j] != POWERDOWN) {
                 int count = 0;
                 //Checking top row
@@ -37,7 +43,7 @@ void FillBoard(Board * b) {
                         count++;
                     }
                     //Checking top right
-                    if(i < 8) {
+                    if(i < BOARDSIZE - 1) {
                         if(b->elements[i + 1][j - 1] == BOMB) {
                             count++;
                         }
@@ -50,13 +56,13 @@ void FillBoard(Board * b) {
                     }
                 }
                 //Checking middle right 
-                if(i < 8) {
+                if(i < BOARDSIZE - 1) {
                     if(b->elements[i + 1][j] == BOMB) {
                         count++;
                     }
                 }
                 //Checking bottom 
-                if(j < 8) {
+                if(j < BOARDSIZE - 1) {
                     if(i > 0) {
                         //Checking bottom left 
                         if(b->elements[i - 1][j + 1] == BOMB) {
@@ -68,7 +74,7 @@ void FillBoard(Board * b) {
                         count++;
                     }
                     //Checking bottom right 
-                    if(i < 8) {
+                    if(i < BOARDSIZE - 1) {
                         if(b->elements[i + 1][j + 1] == BOMB) {
                             count++;
                         }
@@ -81,14 +87,14 @@ void FillBoard(Board * b) {
 }
 
 void RandomizeBoard(Board * b, int i, int j) {
-    int bombCount = 10;
-    int upCount = 2;
-    int downCount = 2;
+    int bombCount = BOMBAMOUNT;
+    int upCount = POWERAMOUNT;
+    int downCount = POWERAMOUNT;
     
     //Adds bombs to board 
     while(bombCount != 0) {
-        int x = GetRandomValue(0, 8);
-        int y = GetRandomValue(0, 8);
+        int x = GetRandomValue(0, BOARDSIZE - 1);
+        int y = GetRandomValue(0, BOARDSIZE - 1);
         
         if(!(x == i && y == j) && b->elements[x][y] == EMPTY) {
             b->elements[x][y] = BOMB;
@@ -98,8 +104,8 @@ void RandomizeBoard(Board * b, int i, int j) {
     
     //Adds Power Ups to Board 
     while(upCount != 0) {
-        int x = GetRandomValue(0, 8);
-        int y = GetRandomValue(0, 8);
+        int x = GetRandomValue(0, BOARDSIZE - 1);
+        int y = GetRandomValue(0, BOARDSIZE - 1);
         
         if(!(x == i && y == j) && b->elements[x][y] == EMPTY) {
             b->elements[x][y] = POWERUP;
@@ -109,8 +115,8 @@ void RandomizeBoard(Board * b, int i, int j) {
     
     //Adds Power Downs to Board 
     while(downCount != 0) {
-        int x = GetRandomValue(0, 8);
-        int y = GetRandomValue(0, 8);
+        int x = GetRandomValue(0, BOARDSIZE - 1);
+        int y = GetRandomValue(0, BOARDSIZE - 1);
         
         if(!(x == i && y == j) && b->elements[x][y] == EMPTY) {
             b->elements[x][y] = POWERDOWN;
@@ -144,7 +150,7 @@ void ApplyPowerDown(bool **col, Board * board, Board * flags) {
     //}
 }*/
 
-void CheckSurroundingSpaces(int i, int j, bool col[][9], Board * b) {
+void CheckSurroundingSpaces(int i, int j, bool col[BOARDSIZE][BOARDSIZE], Board * b) {
     
     //Checking top row
     if(j > 0) {
@@ -198,29 +204,58 @@ void CheckSurroundingSpaces(int i, int j, bool col[][9], Board * b) {
     }
 }
 
-int main()
+void DrawButtons(Rectangle * buttons, Texture2D * textures)
 {
-    int screenWidth = 174;
-    int screenHeight = 199;
-    
-    int boardHeight = 9;
-    int boardWidth = 9;
-    
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
-    
-    Rectangle tiles[boardWidth][boardHeight];
-    bool collided[boardWidth][boardHeight];
-    
-    int textureCount = 13;
-    Texture2D * textures = malloc(textureCount*sizeof(Texture2D));
-    FillTextureArray(textureCount, textures);
-    
+    for(int i = 0;i<3;i++)
+    {
+        DrawRectangleRec(buttons[i],WHITE);
+        DrawTexture(textures[13+i],buttons[i].x, buttons[i].y,WHITE);
+    }
+}
+
+bool PressButton(Vector2 mouseLocation, Rectangle * buttons)
+{
+    if(CheckCollisionPointRec(mouseLocation, buttons[0]))
+    {
+        if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
+            BOARDSIZE = 9;
+            BOMBAMOUNT = 10;
+            POWERAMOUNT = 2;
+            return true;
+        }
+    }
+    else if(CheckCollisionPointRec(mouseLocation, buttons[1]))
+    {
+        if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
+            BOARDSIZE = 16;
+            BOMBAMOUNT = 40;
+            POWERAMOUNT = 8;
+            return true;
+        }
+    }
+    else if(CheckCollisionPointRec(mouseLocation, buttons[2]))
+    {
+        if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
+            BOARDSIZE = 24;
+            BOMBAMOUNT = 99;
+            POWERAMOUNT = 18;
+            return true;
+        }
+    }
+    return false;
+}
+
+void AddTiles(Rectangle tiles[BOARDSIZE][BOARDSIZE])
+{
     int xStart = 15;
     int yStart = 40;
     
-    for(int i = 0;i < boardWidth;i++)
+    for(int i = 0;i < BOARDSIZE;i++)
     {
-        for(int j = 0;j < boardHeight;j++)
+        for(int j = 0;j < BOARDSIZE;j++)
         {
             tiles[i][j].x = xStart;
             tiles[i][j].y = yStart;
@@ -231,74 +266,129 @@ int main()
         xStart = 15;
         yStart+=16;
     }
+}
+
+int main()
+{
+    int screenWidth = (16*BOARDSIZE)+30;
+    int screenHeight = (16*BOARDSIZE)+100;
     
-    for(int i = 0;i < boardWidth;i++)
+    InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
+    
+    // Code to handle the resizing buttons
+    Rectangle buttons[3];
+    int xButtonStart = 0;
+    int yButtonStart = 5;
+    for(int i = 0;i<3;i++)
     {
-        for(int j = 0;j < boardHeight;j++)
+        buttons[i].x = xButtonStart + 15;
+        buttons[i].y = yButtonStart;
+        buttons[i].width = 47;
+        buttons[i].height = 30;
+        xButtonStart+=48;
+    }
+    
+    int textureCount = 16;
+    Texture2D * textures = malloc(textureCount*sizeof(Texture2D));
+    FillTextureArray(textureCount, textures);
+    
+    // Fills the array holding the Rectangles required for collision detection.
+    // Each element in tiles represents a square on the board.
+    Rectangle tiles[BOARDSIZE][BOARDSIZE];
+    
+    AddTiles(tiles);
+    
+    bool collided[BOARDSIZE][BOARDSIZE];                            // Initializing collided
+    bool flagged[BOARDSIZE][BOARDSIZE];                             // Initializing flagged
+	Board * board = malloc(sizeof(piece[BOARDSIZE][BOARDSIZE]));    // Initializing board
+    
+    // Setting initial conditions of all the pointers to false and empty
+    for(int i = 0;i < BOARDSIZE;i++)
+    {
+        for(int j = 0;j < BOARDSIZE;j++)
         {
             collided[i][j] = false;
+            flagged[i][j] = false;
+            board->elements[i][j] = EMPTY;
         }
     }
     
     Vector2 mouseLocation;
     
     SetTargetFPS(30);
-	
-    //Allocate memory for Board 
-	Board * board = malloc(sizeof(piece[9][9]));
-    
-    Board * flags = malloc(sizeof(piece[9][9]));
-    
-    //Fill board with empty spaces
-    for(int i = 0; i < 9; i++) {
-        for (int j = 0; j < 9; j++) {
-            board->elements[i][j] = EMPTY;
-            board->elements[i][j] = EMPTY;
-        }
-    }
     
     bool firstClick = true;
     bool bombClicked = false;
     
     int flagOnBombCount = 0;
+    int flagCount = 0;
     
     // Renews the display continuously until the program is closed or Esc key is pressed.
     while (!WindowShouldClose())
     {
-        for(int i = 0;i<9;i++)
+        mouseLocation = GetMousePosition();
+        if(PressButton(mouseLocation,buttons))
         {
-            for(int j = 0;j<9;j++)
+            firstClick = true;
+            bombClicked = false;
+            flagOnBombCount = 0;
+            flagCount = 0;
+            
+            //Board * tempBoard = malloc(sizeof(piece[BOARDSIZE][BOARDSIZE]));
+            //bool tempFlagged[BOARDSIZE][BOARDSIZE];
+            //bool tempCollidded[BOARDSIZE][BOARDSIZE];
+            //Rectangle tempTiles[BOARDSIZE][BOARDSIZE];
+            
+            //board = tempBoard;
+            //flagged = tempFlagged;
+            //collided = tempCollidded;
+            //tiles = tempTiles;
+            
+            AddTiles(tiles);
+            
+            for(int i = 0;i<BOARDSIZE;i++)
             {
-                if(flags->elements[i][j] == FLAG && board->elements[i][j] == BOMB)
-                {
-                    flagOnBombCount++;
-                    board->elements[i][j] = FLAG;
-                    flags->elements[i][j] = FLAG;
-                }
-            }
-        }
-        
-        if(flagOnBombCount == 10)
-        {
-            for(int i = 0;i<9;i++)
-            {
-                for(int j = 0;j<9;j++)
+                for(int j = 0;j<BOARDSIZE;j++)
                 {
                     board->elements[i][j] = EMPTY;
+                    flagged[i][j] = false;
                     collided[i][j] = false;
                 }
             }
         }
         
-        mouseLocation = GetMousePosition();
-        
-        for(int i = 0;i < boardWidth;i++)
+        // Determines Win Condition
+        if(flagOnBombCount == BOMBAMOUNT && flagCount == BOMBAMOUNT)
         {
-            for(int j = 0;j < boardHeight;j++)
+            for(int i = 0;i<BOARDSIZE;i++)
+            {
+                for(int j = 0;j<BOARDSIZE;j++)
+                {
+                    collided[i][j] = false;
+                }
+            }
+            DrawText("You Won!. \nYou got gud.", 15, screenHeight-50, 12, BLACK);
+        }
+        // Deterines Loss Condition
+        else if(bombClicked)
+        {
+            for(int i = 0;i<BOARDSIZE;i++)
+            {
+                for(int j = 0;j<BOARDSIZE;j++)
+                {
+                    collided[i][j] = true;
+                }
+            }
+            DrawText("You hit a bomb, you lose. \nGit gud.", 15, screenHeight-50, 12, BLACK);
+        }
+        
+        for(int i = 0;i < BOARDSIZE;i++)
+        {
+            for(int j = 0;j < BOARDSIZE;j++)
             {
                 if(CheckCollisionPointRec(mouseLocation, tiles[i][j]))
                 {
-                    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && bombClicked == false)
+                    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && bombClicked == false && flagged[i][j] == false)
                     {
                         if(firstClick) {
                             RandomizeBoard(board, i, j);
@@ -317,24 +407,42 @@ int main()
                     }
                     else if(IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) && bombClicked == false)
                     {
-                        if(flags->elements[i][j] == EMPTY) {
-                            flags->elements[i][j] = FLAG;
-                            //collided[i][j] = true;
-                            DrawTexture(textures[10],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
+                        if(!flagged[i][j]) 
+                        {
+                            if(board->elements[i][j] == BOMB)
+                            {
+                                flagged[i][j] = true;
+                                flagCount++;
+                                flagOnBombCount++;
+                            }
+                            else
+                            {
+                                flagged[i][j] = true;
+                                flagCount++;
+                            }
                         }
-                        /*
-                        else {
-                            flags->elements[i][j] = EMPTY;
-                            collided[i][j] = false;
-                        }*/
+                        else if(flagged[i][j])
+                        {
+                            if(board->elements[i][j] == BOMB)
+                            {
+                                flagged[i][j] = false;
+                                flagCount--;
+                                flagOnBombCount--;
+                            }
+                            else
+                            {
+                                flagged[i][j] = false;
+                                flagCount--;
+                            }
+                        }
                     }
                     
                     // Allows you to press spacebar to reveal the board.
                     else if(IsKeyPressed(KEY_SPACE))
                     {
-                        for(int c = 0;c<9;c++)
+                        for(int c = 0;c<BOARDSIZE;c++)
                         {
-                            for(int d = 0;d<9;d++)
+                            for(int d = 0;d<BOARDSIZE;d++)
                             {
                                 collided[c][d] = true;
                             }
@@ -344,40 +452,27 @@ int main()
             }
         }
 		
-		
-        
         BeginDrawing();
-
         ClearBackground(RAYWHITE);
         
-        for(int i = 0;i<boardWidth;i++)
+        DrawButtons(buttons,textures);
+        
+        for(int i = 0;i<BOARDSIZE;i++)
         {
-            for(int j = 0;j<boardHeight;j++)
+            for(int j = 0;j<BOARDSIZE;j++)
             {
                 if(collided[i][j] == false)
                 {
                     DrawRectangleRec(tiles[i][j], GRAY);
                     
-                    if (flags->elements[i][j] == FLAG) {
+                    if (flagged[i][j]) {
                         DrawTexture(textures[10],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }
                 }
-                else
+                else if(collided[i][j] == true)
                 {
-                    DrawRectangleRec(tiles[i][j], WHITE);
-                }
-            }
-        }
-        
-        for(int i = 0;i<boardWidth;i++)
-        {
-            for(int j = 0;j<boardHeight;j++)
-            {
-                if(collided[i][j] == true)
-                {
-                    if(board->elements[i][j] == BOMB && flags->elements[i][j] != FLAG){
+                    if(board->elements[i][j] == BOMB && flagged[i][j] == false){
                         DrawTexture(textures[9],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
-                        DrawText("You hit a bomb, you lose. \nGit gud.", 0, 0, 12, BLACK);
                         bombClicked = true;
                     }/*
                     else if(board->elements[i][j] == POWERUP) {
@@ -389,11 +484,6 @@ int main()
                     else{
                         DrawTexture(textures[board->elements[i][j]],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }
-                    
-                    /*
-                    if (flags->elements[i][j] == FLAG) {
-                        DrawTexture(textures[10],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
-                    }*/
                 }
             }
         }
@@ -401,6 +491,9 @@ int main()
         EndDrawing();
     }
     CloseWindow();
+    
+    free(textures);
+    free(board);
     
     return 0;
 }

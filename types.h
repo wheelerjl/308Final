@@ -25,7 +25,7 @@ typedef enum
 } piece;
 
 typedef struct {
-   piece elements[9][9];
+   piece elements[24][24];
 } Board;
 
 #endif /* types_h */

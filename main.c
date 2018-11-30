@@ -13,8 +13,7 @@ int BOARDSIZE = 9;
 int BOMBAMOUNT = 10;
 int POWERAMOUNT = 2;
 
-void FillTextureArray(int count, Texture2D * text)
-{
+void FillTextureArray(int count, Texture2D * text) {
     const char * strings[] = {"images/empty.png", "images/one.png", "images/two.png", "images/three.png", 
                             "images/four.png", "images/five.png", "images/six.png", "images/seven.png", 
                             "images/eight.png", "images/bomb.png","images/flag.png","images/PowerDown.png",
@@ -127,8 +126,7 @@ void RandomizeBoard(Board * b, int i, int j) {
     FillBoard(b);
 }
 
-/*
-void ApplyPowerUp(bool **col, Board * board, Board * flags) {
+/*void ApplyPowerUp(bool **col, Board * board, Board * flags) {
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j < 8; j++) {
             if(board->elements[i][j] == BOMB && flags->elements[i][j] == EMPTY) {
@@ -139,8 +137,7 @@ void ApplyPowerUp(bool **col, Board * board, Board * flags) {
     }
 }*/
 
-/*
-void ApplyPowerDown(bool **col, Board * board, Board * flags) {
+/*void ApplyPowerDown(bool **col, Board * board, Board * flags) {
     int x = GetRandomValue(0, 8);
     int y = GetRandomValue(0, 8);
     
@@ -204,52 +201,8 @@ void CheckSurroundingSpaces(int i, int j, bool col[BOARDSIZE][BOARDSIZE], Board 
     }
 }
 
-void DrawButtons(Rectangle * buttons, Texture2D * textures)
-{
-    for(int i = 0;i<3;i++)
-    {
-        DrawRectangleRec(buttons[i],WHITE);
-        DrawTexture(textures[13+i],buttons[i].x, buttons[i].y,WHITE);
-    }
-}
-
-bool PressButton(Vector2 mouseLocation, Rectangle * buttons)
-{
-    if(CheckCollisionPointRec(mouseLocation, buttons[0]))
-    {
-        if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-        {
-            BOARDSIZE = 9;
-            BOMBAMOUNT = 10;
-            POWERAMOUNT = 2;
-            return true;
-        }
-    }
-    else if(CheckCollisionPointRec(mouseLocation, buttons[1]))
-    {
-        if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-        {
-            BOARDSIZE = 16;
-            BOMBAMOUNT = 40;
-            POWERAMOUNT = 8;
-            return true;
-        }
-    }
-    else if(CheckCollisionPointRec(mouseLocation, buttons[2]))
-    {
-        if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-        {
-            BOARDSIZE = 24;
-            BOMBAMOUNT = 99;
-            POWERAMOUNT = 18;
-            return true;
-        }
-    }
-    return false;
-}
-
-void AddTiles(Rectangle tiles[BOARDSIZE][BOARDSIZE])
-{
+void AddTiles(Rectangle tiles[BOARDSIZE][BOARDSIZE]) {
+    
     int xStart = 15;
     int yStart = 40;
     
@@ -268,25 +221,98 @@ void AddTiles(Rectangle tiles[BOARDSIZE][BOARDSIZE])
     }
 }
 
-int main()
-{
-    int screenWidth = (16*BOARDSIZE)+30;
-    int screenHeight = (16*BOARDSIZE)+100;
+int GetInitialSize() {
+    int screenWidth = 153;
+    int screenHeight = 40;
     
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
-    
-    // Code to handle the resizing buttons
     Rectangle buttons[3];
-    int xButtonStart = 0;
+    int xButtonStart = 5;
     int yButtonStart = 5;
     for(int i = 0;i<3;i++)
     {
-        buttons[i].x = xButtonStart + 15;
+        buttons[i].x = xButtonStart;
         buttons[i].y = yButtonStart;
         buttons[i].width = 47;
         buttons[i].height = 30;
         xButtonStart+=48;
     }
+    
+    Vector2 mouseLocation;
+
+    InitWindow(screenWidth, screenHeight, "Spiked Ball Sweeper");
+    
+    int textureCount = 16;
+    Texture2D * textures = malloc(textureCount*sizeof(Texture2D));
+    FillTextureArray(textureCount, textures);
+    
+    SetTargetFPS(30);
+    
+    bool choseSize = false;
+    
+    while (!WindowShouldClose())
+    {
+        mouseLocation = GetMousePosition();
+        // Update
+        //----------------------------------------------------------------------------------
+        // TODO: Update your variables here
+        //----------------------------------------------------------------------------------
+
+        // Draw
+        //----------------------------------------------------------------------------------
+        BeginDrawing();
+
+        ClearBackground(RAYWHITE);
+        
+        for(int i = 0;i<3;i++)
+        {
+            DrawRectangleRec(buttons[i],WHITE);
+            DrawTexture(textures[13+i],buttons[i].x, buttons[i].y,WHITE);
+        }
+        
+        if(CheckCollisionPointRec(mouseLocation, buttons[0]))
+        {
+            if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                BOARDSIZE = 9;
+                BOMBAMOUNT = 10;
+                POWERAMOUNT = 2;
+            }
+        }
+        else if(CheckCollisionPointRec(mouseLocation, buttons[1]))
+        {
+            if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                BOARDSIZE = 16;
+                BOMBAMOUNT = 40;
+                POWERAMOUNT = 8;
+            }
+        }
+        else if(CheckCollisionPointRec(mouseLocation, buttons[2]))
+        {
+            if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+            {
+                BOARDSIZE = 24;
+                BOMBAMOUNT = 90;
+                POWERAMOUNT = 12;
+            }
+        }
+        
+        EndDrawing();
+    } 
+    CloseWindow();
+    
+    free(textures);
+}
+
+int main() {
+    
+    // Asks the user what difficulty to use
+    GetInitialSize();
+    
+    int screenWidth = (16*BOARDSIZE)+30;
+    int screenHeight = (16*BOARDSIZE)+100;
+    
+    InitWindow(screenWidth, screenHeight, "Spiked Ball Sweeper");
     
     int textureCount = 16;
     Texture2D * textures = malloc(textureCount*sizeof(Texture2D));
@@ -302,7 +328,7 @@ int main()
     bool flagged[BOARDSIZE][BOARDSIZE];                             // Initializing flagged
 	Board * board = malloc(sizeof(piece[BOARDSIZE][BOARDSIZE]));    // Initializing board
     
-    // Setting initial conditions of all the pointers to false and empty
+    // Setting initial conditions of collided, flagged and board
     for(int i = 0;i < BOARDSIZE;i++)
     {
         for(int j = 0;j < BOARDSIZE;j++)
@@ -327,35 +353,6 @@ int main()
     while (!WindowShouldClose())
     {
         mouseLocation = GetMousePosition();
-        if(PressButton(mouseLocation,buttons))
-        {
-            firstClick = true;
-            bombClicked = false;
-            flagOnBombCount = 0;
-            flagCount = 0;
-            
-            //Board * tempBoard = malloc(sizeof(piece[BOARDSIZE][BOARDSIZE]));
-            //bool tempFlagged[BOARDSIZE][BOARDSIZE];
-            //bool tempCollidded[BOARDSIZE][BOARDSIZE];
-            //Rectangle tempTiles[BOARDSIZE][BOARDSIZE];
-            
-            //board = tempBoard;
-            //flagged = tempFlagged;
-            //collided = tempCollidded;
-            //tiles = tempTiles;
-            
-            AddTiles(tiles);
-            
-            for(int i = 0;i<BOARDSIZE;i++)
-            {
-                for(int j = 0;j<BOARDSIZE;j++)
-                {
-                    board->elements[i][j] = EMPTY;
-                    flagged[i][j] = false;
-                    collided[i][j] = false;
-                }
-            }
-        }
         
         // Determines Win Condition
         if(flagOnBombCount == BOMBAMOUNT && flagCount == BOMBAMOUNT)
@@ -455,8 +452,6 @@ int main()
         BeginDrawing();
         ClearBackground(RAYWHITE);
         
-        DrawButtons(buttons,textures);
-        
         for(int i = 0;i<BOARDSIZE;i++)
         {
             for(int j = 0;j<BOARDSIZE;j++)
@@ -474,13 +469,7 @@ int main()
                     if(board->elements[i][j] == BOMB && flagged[i][j] == false){
                         DrawTexture(textures[9],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                         bombClicked = true;
-                    }/*
-                    else if(board->elements[i][j] == POWERUP) {
-                        DrawTexture(textures[12],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }
-                    else if(board->elements[i][j] == POWERDOWN) {
-                        DrawTexture(textures[11],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
-                    }*/
                     else{
                         DrawTexture(textures[board->elements[i][j]],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }

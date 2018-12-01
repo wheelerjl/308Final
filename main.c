@@ -8,6 +8,7 @@
 #include "types.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int BOARDSIZE = 9;
 int BOMBAMOUNT = 9;
@@ -258,6 +259,8 @@ void GetInitialSize() {
 
     InitWindow(screenWidth, screenHeight, "Spiked Ball Sweeper");
     
+    Font ourFont = LoadFont("resources/fonts/romulus.png");
+    
     int textureCount = 16;
     Texture2D * textures = malloc(textureCount*sizeof(Texture2D));
     FillTextureArray(textureCount, textures);
@@ -277,7 +280,14 @@ void GetInitialSize() {
             DrawTexture(textures[13+i],buttons[i].x, buttons[i].y,WHITE);
         }
         
-        DrawText("Choose an Option then\n close the window.", 15, screenHeight-50, 12, BLACK);
+        Vector2 textLocation;
+        textLocation.x = 15;
+        textLocation.y = screenHeight-55;
+        
+        // font, Text, Vector2, fontSize, spacing, Color
+        Message text;
+        text.m = "Choose an Option\nthen close\nthe window.";
+        DrawTextEx(ourFont,text.m,textLocation, 12, 3, BLACK);
         
         if(CheckCollisionPointRec(mouseLocation, buttons[0]))
         {
@@ -312,6 +322,7 @@ void GetInitialSize() {
     CloseWindow();
     
     free(textures);
+    UnloadFont(ourFont);
 }
 
 int main() {
@@ -323,6 +334,8 @@ int main() {
     int screenHeight = (16*BOARDSIZE)+80;
     
     InitWindow(screenWidth, screenHeight, "Spiked Ball Sweeper");
+    
+    Font ourFont = LoadFont("resources/fonts/romulus.png");
     
     int textureCount = 16;
     Texture2D * textures = malloc(textureCount*sizeof(Texture2D));
@@ -359,10 +372,19 @@ int main() {
     int flagOnBombCount = 0;
     int flagCount = 0;
     
+    Message text;
+    text.m = "Welcome to: \nSpiked Ball Sweeper!";
+    Vector2 textLocation;
+    textLocation.x = 15;
+    textLocation.y = screenHeight-50;
+    
     // Renews the display continuously until the program is closed or Esc key is pressed.
     while (!WindowShouldClose())
     {
         mouseLocation = GetMousePosition();
+        
+        // font, Text, Vector2, fontSize, spacing, Color
+        DrawTextEx(ourFont,text.m,textLocation, 12, 3, BLACK);
         
         // Determines Win Condition
         if(flagOnBombCount == BOMBAMOUNT && flagCount == BOMBAMOUNT)
@@ -371,10 +393,15 @@ int main() {
             {
                 for(int j = 0;j<BOARDSIZE;j++)
                 {
-                    collided[i][j] = false;
+                    if(board->elements[i][j] == BOMB)
+                    {
+                        board->elements[i][j] = FLAG;
+                    }
+                    collided[i][j] = true;
                 }
             }
-            DrawText("You Won!. \nYou got gud.", 15, screenHeight-50, 12, BLACK);
+            text.m = "You Won!. \nYou got gud.";
+            DrawTextEx(ourFont,text.m,textLocation, 12, 3, BLACK);
         }
         // Deterines Loss Condition
         else if(bombClicked)
@@ -386,7 +413,8 @@ int main() {
                     collided[i][j] = true;
                 }
             }
-            DrawText("You hit a bomb, you lose. \nGit gud.", 15, screenHeight-50, 12, BLACK);
+            text.m = "You hit a bomb.\nYou lose, git gud.";
+            DrawTextEx(ourFont,text.m,textLocation, 12, 3, BLACK);
         }
         
         for(int i = 0;i < BOARDSIZE;i++)
@@ -493,6 +521,7 @@ int main() {
     }
     CloseWindow();
     
+    UnloadFont(ourFont);
     free(textures);
     free(board);
     

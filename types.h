@@ -35,11 +35,11 @@ typedef enum {
 } powerDown;
 
 typedef struct {
-   piece elements[24][24];
+    piece elements[24][24];
 } Board;
 
 typedef struct {
-    
-} Button;
+    char * m;
+} Message;
 
 #endif /* types_h */

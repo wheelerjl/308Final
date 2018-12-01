@@ -294,7 +294,7 @@ int GetInitialSize() {
             {
                 BOARDSIZE = 9;
                 BOMBAMOUNT = 10;
-                POWERAMOUNT = 2;
+                POWERAMOUNT = 1;
             }
         }
         else if(CheckCollisionPointRec(mouseLocation, buttons[1]))
@@ -303,7 +303,7 @@ int GetInitialSize() {
             {
                 BOARDSIZE = 16;
                 BOMBAMOUNT = 40;
-                POWERAMOUNT = 8;
+                POWERAMOUNT = 2;
             }
         }
         else if(CheckCollisionPointRec(mouseLocation, buttons[2]))
@@ -312,7 +312,7 @@ int GetInitialSize() {
             {
                 BOARDSIZE = 24;
                 BOMBAMOUNT = 90;
-                POWERAMOUNT = 12;
+                POWERAMOUNT = 3;
             }
         }
         

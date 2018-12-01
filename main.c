@@ -126,6 +126,15 @@ void RandomizeBoard(Board * b, int i, int j) {
     FillBoard(b);
 }
 
+
+//
+//  Handles what happens when an Up arrow is revealed (PowerUp)
+//  REMOVEBOMB  -   At board->elements[x][y] where the PowerUp was found, make it = EMPTY
+//                  Find a BOMB in the board and make board->elements[x][y] = EMPTY
+//                  Call FillBoard to recalculate the numbers around each bomb
+//                  Subtract 1 from BOMBAMOUNT
+//  FLAGBOMB    -   At board->elements[x][y] where the PowerUp was found, make it = EMPTY
+//                  Find a BOMB on the board and make flagged[x][y] = true
 /*void ApplyPowerUp(bool **col, Board * board, Board * flags) {
     for(int i = 0; i < 8; i++) {
         for(int j = 0; j < 8; j++) {
@@ -137,6 +146,14 @@ void RandomizeBoard(Board * b, int i, int j) {
     }
 }*/
 
+//
+//  Handles what happens when a Down arrow is revealed (PowerDown)
+//  ADDBOMB     -   At board->elements[x][y] where the PowerDown was found, make it = EMPTY
+//              -   Find a location in board->elements[x][y] that doesn't have a bomb and place a bomb there
+//              -   Call FillBoard to recalculate the numbers around each bomb
+//              -   Add 1 to BOMBAMOUNT
+//  RESTART     -   At board->elements[x][y] where the PowerDown was found, make it = EMPTY
+//                  make all elements in collided = false
 /*void ApplyPowerDown(bool **col, Board * board, Board * flags) {
     int x = GetRandomValue(0, 8);
     int y = GetRandomValue(0, 8);

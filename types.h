@@ -24,8 +24,22 @@ typedef enum
     POWERDOWN
 } piece;
 
+typedef enum {
+    REMOVEBOMB,
+    FLAGBOMB,
+} powerUp;
+
+typedef enum {
+    ADDBOMB,
+    RESTART,
+} powerDown;
+
 typedef struct {
    piece elements[24][24];
 } Board;
+
+typedef struct {
+    
+} Button;
 
 #endif /* types_h */

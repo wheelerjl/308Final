@@ -10,8 +10,8 @@
 #include <stdlib.h>
 
 int BOARDSIZE = 9;
-int BOMBAMOUNT = 10;
-int POWERAMOUNT = 2;
+int BOMBAMOUNT = 9;
+int POWERAMOUNT = 1;
 
 void FillTextureArray(int count, Texture2D * text) {
     const char * strings[] = {"images/empty.png", "images/one.png", "images/two.png", "images/three.png", 
@@ -238,7 +238,7 @@ void AddTiles(Rectangle tiles[BOARDSIZE][BOARDSIZE]) {
     }
 }
 
-int GetInitialSize() {
+void GetInitialSize() {
     int screenWidth = 153;
     int screenHeight = 100;
     
@@ -264,18 +264,9 @@ int GetInitialSize() {
     
     SetTargetFPS(30);
     
-    bool choseSize = false;
-    
     while (!WindowShouldClose())
     {
         mouseLocation = GetMousePosition();
-        // Update
-        //----------------------------------------------------------------------------------
-        // TODO: Update your variables here
-        //----------------------------------------------------------------------------------
-
-        // Draw
-        //----------------------------------------------------------------------------------
         BeginDrawing();
 
         ClearBackground(RAYWHITE);
@@ -293,7 +284,7 @@ int GetInitialSize() {
             if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
             {
                 BOARDSIZE = 9;
-                BOMBAMOUNT = 10;
+                BOMBAMOUNT = 9;
                 POWERAMOUNT = 1;
             }
         }
@@ -360,7 +351,7 @@ int main() {
     
     Vector2 mouseLocation;
     
-    SetTargetFPS(30);
+    SetTargetFPS(15);
     
     bool firstClick = true;
     bool bombClicked = false;
@@ -404,7 +395,7 @@ int main() {
             {
                 if(CheckCollisionPointRec(mouseLocation, tiles[i][j]))
                 {
-                    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && bombClicked == false && flagged[i][j] == false)
+                    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && bombClicked == false && flagged[i][j] == false && (board->elements[i][j] == EMPTY || collided[i][j] == false))
                     {
                         if(firstClick) {
                             RandomizeBoard(board, i, j);
@@ -452,18 +443,20 @@ int main() {
                             }
                         }
                     }
-                    
-                    // Allows you to press spacebar to reveal the board.
-                    else if(IsKeyPressed(KEY_SPACE))
-                    {
-                        for(int c = 0;c<BOARDSIZE;c++)
-                        {
-                            for(int d = 0;d<BOARDSIZE;d++)
-                            {
-                                collided[c][d] = true;
-                            }
-                        }
-                    }
+                }
+            }
+        }
+        
+        // Pressing Spacebar shows the board and instantly loses the game
+        // Board display may not be accurate
+        if(IsKeyPressed(KEY_SPACE))
+        {
+            for(int i = 0;i<BOARDSIZE;i++)
+            {
+                for(int j = 0;j<BOARDSIZE;j++)
+                {
+                    collided[i][j] = true;
+                    flagged[i][j] = false;
                 }
             }
         }

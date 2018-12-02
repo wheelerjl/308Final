@@ -559,23 +559,17 @@ int main() {
                         if(!flagged[i][j]) {
                             if(board->elements[i][j] == BOMB) {
                                 flagged[i][j] = true;
-                                flagCount++;
-                                flagOnBombCount++;
                             }
                             else {
                                 flagged[i][j] = true;
-                                flagCount++;
                             }
                         }
                         else if(flagged[i][j]) {
                             if(board->elements[i][j] == BOMB) {
                                 flagged[i][j] = false;
-                                flagCount--;
-                                flagOnBombCount--;
                             }
                             else {
                                 flagged[i][j] = false;
-                                flagCount--;
                             }
                         }
                     }
@@ -610,8 +604,6 @@ int main() {
                         bool addedFlag = ApplyPowerUp(board, flagged);
                         if(addedFlag)
                         {
-                            flagCount++;
-                            flagOnBombCount++;
                             textBot.m = "A flag was placed!";
                         }
                         else{
@@ -638,6 +630,24 @@ int main() {
                     else{
                         DrawTexture(textures[board->elements[i][j]],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }
+                }
+            }
+        }
+        
+        flagOnBombCount = 0;
+        flagCount = 0;
+        
+        for(int i = 0;i<BOARDSIZE;i++)
+        {
+            for(int j = 0;j<BOARDSIZE;j++)
+            {
+                if(flagged[i][j] == true)
+                {
+                    if(board->elements[i][j] == BOMB)
+                    {
+                        flagOnBombCount++;
+                    }
+                    flagCount++;
                 }
             }
         }

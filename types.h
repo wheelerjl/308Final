@@ -1,7 +1,7 @@
 //
 //  types.c
 //
-//  Created by Jordan Wheeler
+//  Created by Created by Shant Haik, Gavin Neises, Jordan Wheeler
 //
 
 #ifndef types_h

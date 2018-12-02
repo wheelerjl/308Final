@@ -1,7 +1,7 @@
 //
 //  main.c
 //
-//  Created by Jordan Wheeler
+//  Created by Shant Haik, Gavin Neises, Jordan Wheeler
 //
 
 #include "raylib.h"
@@ -166,7 +166,6 @@ void RandomizeBoard(Board * b, int i, int j) {
 }*/
 
 void CheckSurroundingSpaces(int i, int j, bool col[BOARDSIZE][BOARDSIZE], Board * b) {
-    
     //Checking top row
     if(j > 0) {
         //Checking top left 
@@ -383,18 +382,13 @@ int main() {
     {
         mouseLocation = GetMousePosition();
         
-        // font, Text, Vector2, fontSize, spacing, Color
         DrawTextEx(ourFont,text.m,textLocation, 12, 3, BLACK);
         
-        // Determines Win Condition
-        if(flagOnBombCount == BOMBAMOUNT && flagCount == BOMBAMOUNT)
+        if(flagOnBombCount == BOMBAMOUNT && flagCount == BOMBAMOUNT) // Determines if game is won and shows Won screen.
         {
-            for(int i = 0;i<BOARDSIZE;i++)
-            {
-                for(int j = 0;j<BOARDSIZE;j++)
-                {
-                    if(board->elements[i][j] == BOMB)
-                    {
+            for(int i = 0;i<BOARDSIZE;i++) {
+                for(int j = 0;j<BOARDSIZE;j++) {
+                    if(board->elements[i][j] == BOMB) {
                         board->elements[i][j] = FLAG;
                     }
                     collided[i][j] = true;
@@ -403,69 +397,55 @@ int main() {
             text.m = "You Won!. \nYou got gud.";
             DrawTextEx(ourFont,text.m,textLocation, 12, 3, BLACK);
         }
-        // Deterines Loss Condition
-        else if(bombClicked)
+        else if(bombClicked) // Shows Loss Screen
         {
-            for(int i = 0;i<BOARDSIZE;i++)
-            {
-                for(int j = 0;j<BOARDSIZE;j++)
-                {
+            for(int i = 0;i<BOARDSIZE;i++) {
+                for(int j = 0;j<BOARDSIZE;j++) {
                     collided[i][j] = true;
                 }
             }
             text.m = "You hit a bomb.\nYou lose, git gud.";
             DrawTextEx(ourFont,text.m,textLocation, 12, 3, BLACK);
         }
-        
-        for(int i = 0;i < BOARDSIZE;i++)
+        else if (firstClick) // Collision detection for the first play
         {
-            for(int j = 0;j < BOARDSIZE;j++)
-            {
-                if(CheckCollisionPointRec(mouseLocation, tiles[i][j]))
-                {
-                    if(IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && bombClicked == false && flagged[i][j] == false && (board->elements[i][j] == EMPTY || collided[i][j] == false))
-                    {
-                        if(firstClick) {
-                            RandomizeBoard(board, i, j);
-                            firstClick = false;
-                        }/*
-                        if(collided[i][j] == false) {
-                            if(board->elements[i][j] == POWERUP) {
-                                ApplyPowerUp();
-                            }
-                            else if(board->elements[i][j] == POWERDOWN) {
-                                ApplyPowerDown();
-                            }
-                         }*/
+            for(int i = 0;i<BOARDSIZE;i++) {
+                for(int j = 0;j<BOARDSIZE;j++) {
+                    if(CheckCollisionPointRec(mouseLocation, tiles[i][j]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        RandomizeBoard(board, i, j);
+                        firstClick = false;
+                        collided[i][j] = true;
+                    }
+                }
+            }
+        }
+        else if(!bombClicked) // Collision detection for all plays that are not the first 
+        {
+            for(int i = 0;i<BOARDSIZE;i++) {
+                for(int j = 0;j<BOARDSIZE;j++) {
+                    if(CheckCollisionPointRec(mouseLocation, tiles[i][j]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && (board->elements[i][j] == EMPTY || collided[i][j] == false)) {
                         collided[i][j] = true;
                         CheckSurroundingSpaces(i, j, collided, board);
                     }
-                    else if(IsMouseButtonPressed(MOUSE_RIGHT_BUTTON) && bombClicked == false)
-                    {
-                        if(!flagged[i][j]) 
-                        {
-                            if(board->elements[i][j] == BOMB)
-                            {
+                    else if(CheckCollisionPointRec(mouseLocation, tiles[i][j]) && IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
+                        if(!flagged[i][j]) {
+                            if(board->elements[i][j] == BOMB) {
                                 flagged[i][j] = true;
                                 flagCount++;
                                 flagOnBombCount++;
                             }
-                            else
-                            {
+                            else {
                                 flagged[i][j] = true;
                                 flagCount++;
                             }
                         }
-                        else if(flagged[i][j])
-                        {
-                            if(board->elements[i][j] == BOMB)
-                            {
+                        else if(flagged[i][j]) {
+                            if(board->elements[i][j] == BOMB) {
                                 flagged[i][j] = false;
                                 flagCount--;
                                 flagOnBombCount--;
                             }
-                            else
-                            {
+                            else {
                                 flagged[i][j] = false;
                                 flagCount--;
                             }
@@ -492,11 +472,12 @@ int main() {
         BeginDrawing();
         ClearBackground(RAYWHITE);
         
+        // Draws the visual representation of the board and checks for bombs/powerups/powerdowns
         for(int i = 0;i<BOARDSIZE;i++)
         {
             for(int j = 0;j<BOARDSIZE;j++)
             {
-                if(collided[i][j] == false)
+                if(collided[i][j] == false) // Draws all the gray rectangles (Fog of War) that can be clicked on
                 {
                     DrawRectangleRec(tiles[i][j], GRAY);
                     
@@ -504,11 +485,23 @@ int main() {
                         DrawTexture(textures[10],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }
                 }
-                else if(collided[i][j] == true)
+                else if(collided[i][j] == true) // Draws the peices that exist beneath the (Fog of War)
                 {
-                    if(board->elements[i][j] == BOMB && flagged[i][j] == false){
+                    if(board->elements[i][j] == BOMB){ // If any bomb is shown, the game instanstly loses
                         DrawTexture(textures[9],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                         bombClicked = true;
+                    }
+                    else if(board->elements[i][j] == POWERUP && !bombClicked) // If powerup is shown, apply it and make that square EMPTY 
+                    {
+                        //ApplyPowerUp(board,i,j);
+                        text.m = "PowerUp Applied";
+                        board->elements[i][j] = EMPTY;
+                    }
+                    else if(board->elements[i][j] == POWERDOWN && !bombClicked) // If powerdown is shown, apply it and make that square EMPTY 
+                    {
+                        //ApplyPowerDown(board,i,j);
+                        text.m = "PowerDown Applied";
+                        board->elements[i][j] = EMPTY;
                     }
                     else{
                         DrawTexture(textures[board->elements[i][j]],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);

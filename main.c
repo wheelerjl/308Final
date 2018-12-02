@@ -139,7 +139,7 @@ void RandomizeBoard(Board * b, int i, int j) {
 //                  Subtract 1 from BOMBAMOUNT
 //  FLAGBOMB    -   At board->elements[x][y] where the PowerUp was found, make it = EMPTY
 //                  Find a BOMB on the board and make flagged[x][y] = true
-bool ApplyPowerUp(Board * board, bool flagged[BOMBAMOUNT][BOMBAMOUNT]) {
+bool ApplyPowerUp(Board * board, bool flagged[BOARDSIZE][BOARDSIZE]) {
     
     PowerUp powerChoice = GetRandomValue(0, 1);
     int bombChoice = GetRandomValue(0, BOMBAMOUNT - 1);
@@ -275,17 +275,17 @@ void CheckSurroundingSpaces(int i, int j, bool col[BOARDSIZE][BOARDSIZE], Board 
     if(j < 8) {
         if(i > 0) {
             //Checking bottom left 
-            if((b->elements[i - 1][j + 1] != BOMB) && (b->elements[i - 1][j + 1] != POWERUP) && (b->elements[i - 1][j] != POWERDOWN)) {
+            if((b->elements[i - 1][j + 1] != BOMB) && (b->elements[i - 1][j + 1] != POWERUP) && (b->elements[i - 1][j + 1] != POWERDOWN)) {
                 col[i - 1][j + 1] = true;
             }
         }
         //Checking bottom middle
-        if((b->elements[i][j + 1] != BOMB) && (b->elements[i][j + 1] != POWERUP) && (b->elements[i][j] != POWERDOWN)) {
+        if((b->elements[i][j + 1] != BOMB) && (b->elements[i][j + 1] != POWERUP) && (b->elements[i][j + 1] != POWERDOWN)) {
             col[i][j + 1] = true;
         }
         //Checking bottom right 
         if(i < 8) {
-            if((b->elements[i + 1][j + 1] != BOMB) && (b->elements[i + 1][j + 1] != POWERUP) && (b->elements[i + 1][j] != POWERDOWN)) {
+            if((b->elements[i + 1][j + 1] != BOMB) && (b->elements[i + 1][j + 1] != POWERUP) && (b->elements[i + 1][j + 1] != POWERDOWN)) {
                 col[i + 1][j + 1] = true;
             }
         }
@@ -458,8 +458,6 @@ int main() {
     
     Status status = PENDING;
     
-    bool bombClicked = false;
-    
     int flagOnBombCount = 0;
     int flagCount = 0;
     
@@ -559,23 +557,17 @@ int main() {
                         if(!flagged[i][j]) {
                             if(board->elements[i][j] == BOMB) {
                                 flagged[i][j] = true;
-                                flagCount++;
-                                flagOnBombCount++;
                             }
                             else {
                                 flagged[i][j] = true;
-                                flagCount++;
                             }
                         }
                         else if(flagged[i][j]) {
                             if(board->elements[i][j] == BOMB) {
                                 flagged[i][j] = false;
-                                flagCount--;
-                                flagOnBombCount--;
                             }
                             else {
                                 flagged[i][j] = false;
-                                flagCount--;
                             }
                         }
                     }
@@ -605,13 +597,11 @@ int main() {
                         DrawTexture(textures[9],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                         status = LOST;
                     }
-                    else if(board->elements[i][j] == POWERUP && !bombClicked) // If powerup is shown, apply it and make that square EMPTY 
+                    else if(board->elements[i][j] == POWERUP) // If powerup is shown, apply it and make that square EMPTY 
                     {
                         bool addedFlag = ApplyPowerUp(board, flagged);
                         if(addedFlag)
                         {
-                            flagCount++;
-                            flagOnBombCount++;
                             textBot.m = "A flag was placed!";
                         }
                         else{
@@ -621,7 +611,7 @@ int main() {
                         board->elements[i][j] = EMPTY;
                         FillBoard(board);
                     }
-                    else if(board->elements[i][j] == POWERDOWN && !bombClicked) // If powerdown is shown, apply it and make that square EMPTY 
+                    else if(board->elements[i][j] == POWERDOWN) // If powerdown is shown, apply it and make that square EMPTY 
                     {
                         bool addedBomb = ApplyPowerDown(board, collided);
                         if(addedBomb)
@@ -638,6 +628,24 @@ int main() {
                     else{
                         DrawTexture(textures[board->elements[i][j]],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }
+                }
+            }
+        }
+        
+        flagOnBombCount = 0;
+        flagCount = 0;
+        
+        for(int i = 0;i<BOARDSIZE;i++)
+        {
+            for(int j = 0;j<BOARDSIZE;j++)
+            {
+                if(flagged[i][j] == true)
+                {
+                    if(board->elements[i][j] == BOMB)
+                    {
+                        flagOnBombCount++;
+                    }
+                    flagCount++;
                 }
             }
         }

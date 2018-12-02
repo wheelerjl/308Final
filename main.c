@@ -1,6 +1,7 @@
 //
 //  main.c
-//
+//  Final Project
+// 
 //  Created by Shant Haik, Gavin Neises, Jordan Wheeler
 //
 
@@ -8,23 +9,25 @@
 #include "types.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 int BOARDSIZE = 9;
-int BOMBAMOUNT = 9;
+int BOMBAMOUNT = 1;
 int POWERAMOUNT = 1;
 
+// Fills the texture array
 void FillTextureArray(int count, Texture2D * text) {
     const char * strings[] = {"images/empty.png", "images/one.png", "images/two.png", "images/three.png", 
                             "images/four.png", "images/five.png", "images/six.png", "images/seven.png", 
-                            "images/eight.png", "images/bomb.png","images/flag.png","images/PowerDown.png",
-                            "images/PowerUp.png","images/easy.png", "images/medium.png", "images/hard.png" };
+                            "images/eight.png", "images/bomb.png","images/flag.png","images/PowerUp.png",
+                            "images/PowerDown.png","images/easy.png", "images/medium.png", "images/hard.png" };
     for(int i = 0; i < count;i++)
     {
         text[i] = LoadTexture(strings[i]);
     }
 }
 
+// Calculates the number shown for each tile
+// This is depends on how many bombs is next to it
 void FillBoard(Board * b) {
     for(int i = 0; i < BOARDSIZE; i++) {
         for(int j = 0; j < BOARDSIZE; j++) {
@@ -86,6 +89,7 @@ void FillBoard(Board * b) {
     }
 }
 
+// Randomly places bombs, powerups, and powerdowns on the board
 void RandomizeBoard(Board * b, int i, int j) {
     int bombCount = BOMBAMOUNT;
     int upCount = POWERAMOUNT;
@@ -127,7 +131,6 @@ void RandomizeBoard(Board * b, int i, int j) {
     FillBoard(b);
 }
 
-
 //
 //  Handles what happens when an Up arrow is revealed (PowerUp)
 //  REMOVEBOMB  -   At board->elements[x][y] where the PowerUp was found, make it = EMPTY
@@ -136,16 +139,41 @@ void RandomizeBoard(Board * b, int i, int j) {
 //                  Subtract 1 from BOMBAMOUNT
 //  FLAGBOMB    -   At board->elements[x][y] where the PowerUp was found, make it = EMPTY
 //                  Find a BOMB on the board and make flagged[x][y] = true
-/*void ApplyPowerUp(bool **col, Board * board, Board * flags) {
-    for(int i = 0; i < 8; i++) {
-        for(int j = 0; j < 8; j++) {
-            if(board->elements[i][j] == BOMB && flags->elements[i][j] == EMPTY) {
-                col[i][j] = true;
-                flags->elements[i][j] = FLAG;
+bool ApplyPowerUp(Board * board, bool flagged[BOMBAMOUNT][BOMBAMOUNT]) {
+    
+    PowerUp powerChoice = GetRandomValue(0, 1);
+    int bombChoice = GetRandomValue(0, BOMBAMOUNT - 1);
+    
+    // Maps out all the bomb locations
+    Map bombMap[BOMBAMOUNT];
+    int count = 0;
+    for(int i = 0;i<BOARDSIZE;i++)
+    {
+        for(int j = 0;j<BOARDSIZE;j++)
+        {
+            if(board->elements[i][j] == BOMB)
+            {
+                bombMap[count].x = i;
+                bombMap[count].y = j;
+                count++;
             }
         }
     }
-}*/
+    
+    int x = bombMap[bombChoice].x;
+    int y = bombMap[bombChoice].y;
+    
+    if(powerChoice == REMOVEBOMB) // Removes a bomb from the board
+    {
+        board->elements[x][y] = EMPTY;
+        BOMBAMOUNT--;
+    }
+    else if(powerChoice == FLAGBOMB) { // Adds a flag to a bomb location
+        flagged[x][y] = true;
+        return true;
+    }
+    return false;
+}
 
 //
 //  Handles what happens when a Down arrow is revealed (PowerDown)
@@ -155,16 +183,62 @@ void RandomizeBoard(Board * b, int i, int j) {
 //              -   Add 1 to BOMBAMOUNT
 //  RESTART     -   At board->elements[x][y] where the PowerDown was found, make it = EMPTY
 //                  make all elements in collided = false
-/*void ApplyPowerDown(bool **col, Board * board, Board * flags) {
-    int x = GetRandomValue(0, 8);
-    int y = GetRandomValue(0, 8);
+bool ApplyPowerDown(Board * board, bool col[BOARDSIZE][BOARDSIZE]) {
     
-    //if() {
-        //b->elements[x][y] = BOMB;
-        //bombCount--;
-    //}
-}*/
+    PowerDown powerChoice = GetRandomValue(0, 1);
+    
+    int emptyCount = 0;
+    for(int i = 0;i<BOARDSIZE;i++) // Gets the amount of spaces for a bomb to be placed in
+    {
+        for(int j = 0;j<BOARDSIZE;j++)
+        {
+            if(!(board->elements[i][j] == POWERUP || board->elements[i][j] == POWERDOWN || board->elements[i][j] == BOMB))
+            {
+                emptyCount++;
+            }
+        }
+    }
+    
+    int emptyChoice = GetRandomValue(0, emptyCount - 1);
+    
+    Map emptyMap[emptyCount];
+    int count = 0;
+    for(int i = 0;i<BOARDSIZE;i++) // 
+    {
+        for(int j = 0;j<BOARDSIZE;j++)
+        {
+            if(!(board->elements[i][j] == POWERUP || board->elements[i][j] == POWERDOWN || board->elements[i][j] == BOMB))
+            {
+                emptyMap[count].x = i;
+                emptyMap[count].y = j;
+                count++;
+            }
+        }
+    }
+    
+    int x = emptyMap[emptyChoice].x;
+    int y = emptyMap[emptyChoice].y;
+    
+    if(powerChoice == ADDBOMB) {
+        col[x][y] = false;
+        board->elements[x][y] = BOMB;
+        BOMBAMOUNT++;
+        return true;
+    }
+    else if (powerChoice == REFRESH) { // Makes entire board show fog of war
+        for(int i = 0;i<BOARDSIZE;i++)
+        {
+            for(int j = 0;j<BOARDSIZE;j++)
+            {
+                col[i][j] = false;
+            }
+        }
+    }
+    return false;
+}
 
+// Checks the 8 surrounding tiles of the move that was
+// placed to determine if they should be shown or not
 void CheckSurroundingSpaces(int i, int j, bool col[BOARDSIZE][BOARDSIZE], Board * b) {
     //Checking top row
     if(j > 0) {
@@ -218,6 +292,9 @@ void CheckSurroundingSpaces(int i, int j, bool col[BOARDSIZE][BOARDSIZE], Board 
     }
 }
 
+// Adds all the Rectangle objects for the board,
+// Rectangle objects are necessary for registering
+// the mouse clicked in a specific spot.
 void AddTiles(Rectangle tiles[BOARDSIZE][BOARDSIZE]) {
     
     int xStart = 15;
@@ -238,6 +315,8 @@ void AddTiles(Rectangle tiles[BOARDSIZE][BOARDSIZE]) {
     }
 }
 
+// Shows initial window asking to choose difficulty
+// If nothing is chosen, the system defaults to EASY
 void GetInitialSize() {
     int screenWidth = 153;
     int screenHeight = 100;
@@ -258,15 +337,17 @@ void GetInitialSize() {
 
     InitWindow(screenWidth, screenHeight, "Spiked Ball Sweeper");
     
-    Font ourFont = LoadFont("resources/fonts/romulus.png");
+    Font ourFont = LoadFontEx("fonts/comic.ttf", 20, 0, NULL);
     
     int textureCount = 16;
     Texture2D * textures = malloc(textureCount*sizeof(Texture2D));
     FillTextureArray(textureCount, textures);
     
-    SetTargetFPS(30);
+    SetTargetFPS(60);
     
-    while (!WindowShouldClose())
+    bool sizeChosen = false;
+    
+    while (!WindowShouldClose() && !sizeChosen)
     {
         mouseLocation = GetMousePosition();
         BeginDrawing();
@@ -280,13 +361,13 @@ void GetInitialSize() {
         }
         
         Vector2 textLocation;
-        textLocation.x = 15;
+        textLocation.x = 5;
         textLocation.y = screenHeight-55;
         
         // font, Text, Vector2, fontSize, spacing, Color
         Message text;
-        text.m = "Choose an Option\nthen close\nthe window.";
-        DrawTextEx(ourFont,text.m,textLocation, 12, 3, BLACK);
+        text.m = "Please choose a \ndifficulty option.";
+        DrawTextEx(ourFont,text.m,textLocation, 20, 1, BLACK);
         
         if(CheckCollisionPointRec(mouseLocation, buttons[0]))
         {
@@ -295,6 +376,7 @@ void GetInitialSize() {
                 BOARDSIZE = 9;
                 BOMBAMOUNT = 9;
                 POWERAMOUNT = 1;
+                sizeChosen = true;
             }
         }
         else if(CheckCollisionPointRec(mouseLocation, buttons[1]))
@@ -304,6 +386,7 @@ void GetInitialSize() {
                 BOARDSIZE = 16;
                 BOMBAMOUNT = 40;
                 POWERAMOUNT = 2;
+                sizeChosen = true;
             }
         }
         else if(CheckCollisionPointRec(mouseLocation, buttons[2]))
@@ -313,6 +396,7 @@ void GetInitialSize() {
                 BOARDSIZE = 24;
                 BOMBAMOUNT = 90;
                 POWERAMOUNT = 3;
+                sizeChosen = true;
             }
         }
         
@@ -320,6 +404,11 @@ void GetInitialSize() {
     } 
     CloseWindow();
     
+    // Unloads and frees memory for items that were loaded or malloc'ed
+    for(int i = 0;i<textureCount;i++)
+    {
+        UnloadTexture(textures[i]);
+    }
     free(textures);
     UnloadFont(ourFont);
 }
@@ -334,7 +423,7 @@ int main() {
     
     InitWindow(screenWidth, screenHeight, "Spiked Ball Sweeper");
     
-    Font ourFont = LoadFont("resources/fonts/romulus.png");
+    Font ourFont = LoadFontEx("fonts/comic.ttf", 20, 0, NULL);
     
     int textureCount = 16;
     Texture2D * textures = malloc(textureCount*sizeof(Texture2D));
@@ -348,7 +437,7 @@ int main() {
     
     bool collided[BOARDSIZE][BOARDSIZE];                            // Initializing collided
     bool flagged[BOARDSIZE][BOARDSIZE];                             // Initializing flagged
-	Board * board = malloc(sizeof(piece[BOARDSIZE][BOARDSIZE]));    // Initializing board
+	Board * board = malloc(sizeof(Piece[BOARDSIZE][BOARDSIZE]));    // Initializing board
     
     // Setting initial conditions of collided, flagged and board
     for(int i = 0;i < BOARDSIZE;i++)
@@ -366,48 +455,83 @@ int main() {
     SetTargetFPS(15);
     
     bool firstClick = true;
+    
+    Status status = PENDING;
+    
     bool bombClicked = false;
     
     int flagOnBombCount = 0;
     int flagCount = 0;
     
-    Message text;
-    text.m = "Welcome to: \nSpiked Ball Sweeper!";
+    Message textTop;
+    Message textBot;
+    textTop.m = "Welcome to:";// \nSpiked Ball Sweeper!";
+    textBot.m = "Spiked Ball Sweeper!";
+    
     Vector2 textLocation;
-    textLocation.x = 15;
-    textLocation.y = screenHeight-50;
+    textLocation.y = screenHeight-55;
     
     // Renews the display continuously until the program is closed or Esc key is pressed.
     while (!WindowShouldClose())
     {
+        // Pressing Spacebar shows the board and instantly loses the game
+        // Used for testing purposes
+        if(IsKeyPressed(KEY_SPACE))
+        {
+            for(int i = 0;i<BOARDSIZE;i++)
+            {
+                for(int j = 0;j<BOARDSIZE;j++)
+                {
+                    collided[i][j] = true;
+                    flagged[i][j] = false;
+                }
+            }
+        }
+        
+        // Gets the Vector2 location of the mouses current position
         mouseLocation = GetMousePosition();
         
-        DrawTextEx(ourFont,text.m,textLocation, 12, 3, BLACK);
+        // Prints the first line of our text display
+        textLocation.x = (screenWidth/2) - MeasureTextEx(ourFont, textTop.m, ourFont.baseSize*2, 1).x/4;
+        textLocation.y = screenHeight-55;
+        DrawTextEx(ourFont,textTop.m,textLocation, 20, 1, BLACK);
         
-        if(flagOnBombCount == BOMBAMOUNT && flagCount == BOMBAMOUNT) // Determines if game is won and shows Won screen.
+        // Prints the second line of our text display
+        textLocation.x = (screenWidth/2) - MeasureTextEx(ourFont, textBot.m, ourFont.baseSize*2, 1).x/4;
+        textLocation.y = screenHeight-35;
+        DrawTextEx(ourFont,textBot.m,textLocation, 20, 1, BLACK);
+        
+        // Determines if the game is won and shows the Won screen
+        if(status == WON)
         {
             for(int i = 0;i<BOARDSIZE;i++) {
                 for(int j = 0;j<BOARDSIZE;j++) {
                     if(board->elements[i][j] == BOMB) {
                         board->elements[i][j] = FLAG;
                     }
+                    else if(board->elements[i][j] == POWERDOWN || board->elements[i][j] == POWERUP)
+                    {
+                        board->elements[i][j] = EMPTY;
+                    }
                     collided[i][j] = true;
                 }
             }
-            text.m = "You Won!. \nYou got gud.";
-            DrawTextEx(ourFont,text.m,textLocation, 12, 3, BLACK);
+            textTop.m = "You Won!"; 
+            textBot.m = "You got gud.";
         }
-        else if(bombClicked) // Shows Loss Screen
+        // Shows Loss Screen
+        else if(status == LOST)
         {
             for(int i = 0;i<BOARDSIZE;i++) {
                 for(int j = 0;j<BOARDSIZE;j++) {
                     collided[i][j] = true;
                 }
             }
-            text.m = "You hit a bomb.\nYou lose, git gud.";
-            DrawTextEx(ourFont,text.m,textLocation, 12, 3, BLACK);
+            textTop.m = "You hit a bomb.";
+            textBot.m = "You lose, git gud.";
         }
-        else if (firstClick) // Collision detection for the first play
+        // Collision detection for the first play
+        else if (firstClick)
         {
             for(int i = 0;i<BOARDSIZE;i++) {
                 for(int j = 0;j<BOARDSIZE;j++) {
@@ -419,13 +543,17 @@ int main() {
                 }
             }
         }
-        else if(!bombClicked) // Collision detection for all plays that are not the first 
+        // Collision detection for all plays that are not the first 
+        else if(status == PENDING)
         {
             for(int i = 0;i<BOARDSIZE;i++) {
                 for(int j = 0;j<BOARDSIZE;j++) {
                     if(CheckCollisionPointRec(mouseLocation, tiles[i][j]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && (board->elements[i][j] == EMPTY || collided[i][j] == false)) {
-                        collided[i][j] = true;
-                        CheckSurroundingSpaces(i, j, collided, board);
+                        if(!flagged[i][j])
+                        {
+                            collided[i][j] = true;
+                            CheckSurroundingSpaces(i, j, collided, board);
+                        }
                     }
                     else if(CheckCollisionPointRec(mouseLocation, tiles[i][j]) && IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
                         if(!flagged[i][j]) {
@@ -455,24 +583,10 @@ int main() {
             }
         }
         
-        // Pressing Spacebar shows the board and instantly loses the game
-        // Board display may not be accurate
-        if(IsKeyPressed(KEY_SPACE))
-        {
-            for(int i = 0;i<BOARDSIZE;i++)
-            {
-                for(int j = 0;j<BOARDSIZE;j++)
-                {
-                    collided[i][j] = true;
-                    flagged[i][j] = false;
-                }
-            }
-        }
-		
+        // Draws the visual representation of the board 
+        // Checks for bombs/powerups/powerdowns/flags
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        
-        // Draws the visual representation of the board and checks for bombs/powerups/powerdowns
         for(int i = 0;i<BOARDSIZE;i++)
         {
             for(int j = 0;j<BOARDSIZE;j++)
@@ -489,19 +603,37 @@ int main() {
                 {
                     if(board->elements[i][j] == BOMB){ // If any bomb is shown, the game instanstly loses
                         DrawTexture(textures[9],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
-                        bombClicked = true;
+                        status = LOST;
                     }
                     else if(board->elements[i][j] == POWERUP && !bombClicked) // If powerup is shown, apply it and make that square EMPTY 
                     {
-                        //ApplyPowerUp(board,i,j);
-                        text.m = "PowerUp Applied";
+                        bool addedFlag = ApplyPowerUp(board, flagged);
+                        if(addedFlag)
+                        {
+                            flagCount++;
+                            flagOnBombCount++;
+                            textBot.m = "A flag was placed!";
+                        }
+                        else{
+                            textBot.m = "A bomb was removed!";
+                        }
+                        textTop.m = "PowerUp Applied";
                         board->elements[i][j] = EMPTY;
+                        FillBoard(board);
                     }
                     else if(board->elements[i][j] == POWERDOWN && !bombClicked) // If powerdown is shown, apply it and make that square EMPTY 
                     {
-                        //ApplyPowerDown(board,i,j);
-                        text.m = "PowerDown Applied";
+                        bool addedBomb = ApplyPowerDown(board, collided);
+                        if(addedBomb)
+                        {
+                            textBot.m = "A bomb was added!";
+                        }
+                        else{
+                            textBot.m = "Fog of war reset!";
+                        }
+                        textTop.m = "PowerDown Applied";
                         board->elements[i][j] = EMPTY;
+                        FillBoard(board);
                     }
                     else{
                         DrawTexture(textures[board->elements[i][j]],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
@@ -510,10 +642,22 @@ int main() {
             }
         }
         
+        // Changes status to WON if there is a flag on each
+        // bomb and only if there is a flag on each bomb
+        if(flagOnBombCount == BOMBAMOUNT && flagCount == BOMBAMOUNT)
+        {
+            status = WON;
+        }
+        
         EndDrawing();
     }
     CloseWindow();
     
+    // Unloads and frees memory for items that were loaded or malloc'ed
+    for(int i = 0;i<16;i++)
+    {
+        UnloadTexture(textures[i]);
+    }
     UnloadFont(ourFont);
     free(textures);
     free(board);

@@ -1,5 +1,6 @@
 //
 //  types.c
+//  Final Project
 //
 //  Created by Created by Shant Haik, Gavin Neises, Jordan Wheeler
 //
@@ -7,7 +8,7 @@
 #ifndef types_h
 #define types_h
 
-typedef enum 
+typedef enum
 {
     EMPTY,
     ONE,
@@ -22,24 +23,36 @@ typedef enum
     FLAG,
     POWERUP,
     POWERDOWN
-} piece;
+} Piece;
 
-typedef enum {
+typedef enum
+{
+    PENDING,
+    WON,
+    LOST
+} Status;
+
+typedef enum { // Used in ApplyPowerDown
+    ADDBOMB,
+    REFRESH,
+} PowerDown;
+
+typedef enum { // Used in ApplyPowerUp
     REMOVEBOMB,
     FLAGBOMB,
-} powerUp;
-
-typedef enum {
-    ADDBOMB,
-    RESTART,
-} powerDown;
+} PowerUp;
 
 typedef struct {
-    piece elements[24][24];
+    Piece elements[24][24];
 } Board;
 
 typedef struct {
     char * m;
 } Message;
+
+typedef struct {
+    int x;
+    int y;
+} Map;
 
 #endif /* types_h */

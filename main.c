@@ -499,7 +499,6 @@ int main() {
     {
         // Pressing Spacebar shows the board and instantly loses the game
         // Used for testing purposes
-        
         if(IsKeyPressed(KEY_SPACE))
         {
             for(int i = 0;i<BOARDSIZE;i++)
@@ -511,6 +510,7 @@ int main() {
                 }
             }
         }
+        // Resets the board and lets you start a new game at same Difficulty level
         else if(IsKeyPressed(KEY_R))
         {
             for(int i = 0;i<BOARDSIZE;i++)
@@ -528,6 +528,7 @@ int main() {
             textBot.m = "Minesweeper++";
         }
         
+        // Resets the bool array used by the recursive call.
         for(int i = 0; i<BOARDSIZE;i++)
         {
             for(int j = 0;j<BOARDSIZE;j++)

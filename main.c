@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int BOARDSIZE = 9;
-int BOMBAMOUNT = 1;
-int POWERAMOUNT = 1;
+int BOARDSIZE = 24;
+int BOMBAMOUNT = 40;
+int POWERAMOUNT = 0;
 
 // Fills the texture array
 void FillTextureArray(int count, Texture2D * text) {
@@ -100,7 +100,16 @@ void RandomizeBoard(Board * b, int i, int j) {
         int x = GetRandomValue(0, BOARDSIZE - 1);
         int y = GetRandomValue(0, BOARDSIZE - 1);
         
-        if(!(x == i && y == j) && b->elements[x][y] == EMPTY) {
+        bool validStart = true;
+        
+        if(((x == i - 1) && (y == j + 1 || y == j - 1 || y == j))
+            || ((x == i + 1) && (y == j + 1 || y == j - 1 || y == j))
+            || ((x == i) && (y == j + 1 || y == j - 1 || y == j)))
+        {
+            validStart = false;
+        }
+        
+        if(b->elements[x][y] == EMPTY && validStart) {
             b->elements[x][y] = BOMB;
             bombCount--;
         }
@@ -239,8 +248,12 @@ bool ApplyPowerDown(Board * board, bool col[BOARDSIZE][BOARDSIZE]) {
     return false;
 }
 
-// Checks the 8 surrounding tiles of the move that was
-// placed to determine if they should be shown or not
+// Fill in this method with recursize call
+/*int FloodFill(int i, int j, bool col[BOARDSIZE][BOARDSIZE], bool hasBeenChecked[BOARDSIZE][BOARDSIZE], Board * b) {
+
+}*/
+
+// Remove this method and use FloodFill in its place
 void CheckSurroundingSpaces(int i, int j, bool col[BOARDSIZE][BOARDSIZE], Board * b) {
     //Checking top row
     if(j > 0) {
@@ -337,7 +350,7 @@ void GetInitialSize() {
     
     Vector2 mouseLocation;
 
-    InitWindow(screenWidth, screenHeight, "Spiked Ball Sweeper");
+    InitWindow(screenWidth, screenHeight, "Minesweeper++");
     
     Font ourFont = LoadFontEx("fonts/comic.ttf", 20, 0, NULL);
     
@@ -423,7 +436,7 @@ int main() {
     int screenWidth = (16*BOARDSIZE)+30;
     int screenHeight = (16*BOARDSIZE)+80;
     
-    InitWindow(screenWidth, screenHeight, "Spiked Ball Sweeper");
+    InitWindow(screenWidth, screenHeight, "Minesweeper++");
     
     Font ourFont = LoadFontEx("fonts/comic.ttf", 20, 0, NULL);
     
@@ -435,11 +448,21 @@ int main() {
     // Each element in tiles represents a square on the board.
     Rectangle tiles[BOARDSIZE][BOARDSIZE];
     
+    // Fills the tile array with Rectangle objects
     AddTiles(tiles);
     
-    bool collided[BOARDSIZE][BOARDSIZE];                            // Initializing collided
-    bool flagged[BOARDSIZE][BOARDSIZE];                             // Initializing flagged
-	Board * board = malloc(sizeof(Piece[BOARDSIZE][BOARDSIZE]));    // Initializing board
+    // Determines whether to show fog of war or the element underneath
+    bool collided[BOARDSIZE][BOARDSIZE];
+    
+    // Used for adding flags, removing flags, and detecting a win.
+    bool flagged[BOARDSIZE][BOARDSIZE];
+    
+    // Needed for the recursive method, all elements
+    // are reset to false before the FloodFill is called in main
+    bool hasBeenChecked[BOARDSIZE][BOARDSIZE];
+    
+    // Actual board that holds each bomb, powers and numbers
+	Board * board = malloc(sizeof(Piece[BOARDSIZE][BOARDSIZE]));
     
     // Setting initial conditions of collided, flagged and board
     for(int i = 0;i < BOARDSIZE;i++)
@@ -465,8 +488,8 @@ int main() {
     
     Message textTop;
     Message textBot;
-    textTop.m = "Welcome to:";// \nSpiked Ball Sweeper!";
-    textBot.m = "Spiked Ball Sweeper!";
+    textTop.m = "Welcome to:";
+    textBot.m = "Minesweeper++!";
     
     Vector2 textLocation;
     textLocation.y = screenHeight-55;
@@ -476,6 +499,7 @@ int main() {
     {
         // Pressing Spacebar shows the board and instantly loses the game
         // Used for testing purposes
+        
         if(IsKeyPressed(KEY_SPACE))
         {
             for(int i = 0;i<BOARDSIZE;i++)
@@ -485,6 +509,30 @@ int main() {
                     collided[i][j] = true;
                     flagged[i][j] = false;
                 }
+            }
+        }
+        else if(IsKeyPressed(KEY_R))
+        {
+            for(int i = 0;i<BOARDSIZE;i++)
+            {
+                for(int j = 0;j<BOARDSIZE;j++)
+                {
+                    board->elements[i][j] = EMPTY;
+                    firstClick = true;
+                    status = PENDING;
+                    collided[i][j] = false;
+                    flagged[i][j] = false;
+                }
+            }
+            textTop.m = "Welcome to:";
+            textBot.m = "Minesweeper++";
+        }
+        
+        for(int i = 0; i<BOARDSIZE;i++)
+        {
+            for(int j = 0;j<BOARDSIZE;j++)
+            {
+                hasBeenChecked[i][j] = false;
             }
         }
         
@@ -539,6 +587,8 @@ int main() {
                         RandomizeBoard(board, i, j);
                         firstClick = false;
                         collided[i][j] = true;
+                        //FloodFill(i,j,collided,hasBeenChecked,board);
+                        CheckSurroundingSpaces(i,j,collided,board);
                     }
                 }
             }
@@ -552,7 +602,8 @@ int main() {
                         if(!flagged[i][j])
                         {
                             collided[i][j] = true;
-                            CheckSurroundingSpaces(i, j, collided, board);
+                            //FloodFill(i,j,collided,hasBeenChecked,board);
+                            CheckSurroundingSpaces(i,j,collided,board);
                         }
                     }
                     else if(CheckCollisionPointRec(mouseLocation, tiles[i][j]) && IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {

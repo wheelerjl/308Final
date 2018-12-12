@@ -622,7 +622,6 @@ int main() {
                         firstClick = false;
                         collided[i][j] = true;
                         FloodFill(i,j,collided,hasBeenChecked,board);
-                        //CheckSurroundingSpaces(i,j,collided,board);
                     }
                 }
             }
@@ -633,15 +632,14 @@ int main() {
             for(int i = 0;i<BOARDSIZE;i++) {
                 for(int j = 0;j<BOARDSIZE;j++) {
                     if(CheckCollisionPointRec(mouseLocation, tiles[i][j]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && (board->elements[i][j] == EMPTY || collided[i][j] == false)) {
-                        if(!flagged[i][j])
+                        if(!flagged[i][j] && !collided[i][j])
                         {
                             collided[i][j] = true;
                             FloodFill(i,j,collided,hasBeenChecked,board);
-                            //CheckSurroundingSpaces(i,j,collided,board);
                         }
                     }
                     else if(CheckCollisionPointRec(mouseLocation, tiles[i][j]) && IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
-                        if(!flagged[i][j]) {
+                        if(!flagged[i][j] && !collided[i][j]) {
                             if(board->elements[i][j] == BOMB) {
                                 flagged[i][j] = true;
                             }
@@ -649,7 +647,7 @@ int main() {
                                 flagged[i][j] = true;
                             }
                         }
-                        else if(flagged[i][j]) {
+                        else if(flagged[i][j] && !collided[i][j]) {
                             if(board->elements[i][j] == BOMB) {
                                 flagged[i][j] = false;
                             }

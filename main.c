@@ -469,7 +469,7 @@ int main() {
     int screenHeight = (16*BOARDSIZE)+80;
     
     InitWindow(screenWidth, screenHeight, "Minesweeper++");
-    
+    SetWindowPosition(100,100);
     Font ourFont = LoadFontEx("fonts/comic.ttf", 20, 0, NULL);
     
     int textureCount = 16;

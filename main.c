@@ -11,8 +11,8 @@
 #include <stdlib.h>
 
 int BOARDSIZE = 24;
-int BOMBAMOUNT = 40;
-int POWERAMOUNT = 0;
+int BOMBAMOUNT = 20;
+int POWERAMOUNT = 1;
 
 // Fills the texture array
 void FillTextureArray(int count, Texture2D * text) {
@@ -249,12 +249,44 @@ bool ApplyPowerDown(Board * board, bool col[BOARDSIZE][BOARDSIZE]) {
 }
 
 // Fill in this method with recursize call
-/*int FloodFill(int i, int j, bool col[BOARDSIZE][BOARDSIZE], bool hasBeenChecked[BOARDSIZE][BOARDSIZE], Board * b) {
-
-}*/
+int FloodFill(int i, int j, bool col[BOARDSIZE][BOARDSIZE], bool hasBeenChecked[BOARDSIZE][BOARDSIZE], Board * b) {
+    if((i < 0 || i > BOARDSIZE - 1) || (j < 0 || j > BOARDSIZE - 1))
+    {
+        return -1;
+    }
+    
+    if(!(b->elements[i][j] == BOMB || hasBeenChecked[i][j])) // Ignores bomb spaces entirely
+    {
+        if(!(b->elements[i][j] == POWERUP || b->elements[i][j] == POWERDOWN)) // If its EMPTY or NUBMER
+        {
+            col[i][j] = true;
+            hasBeenChecked[i][j] = true;
+        }
+        else // If its a power
+        {
+            hasBeenChecked[i][j] = true;
+        }
+        
+        if(!(b->elements[i][j] == POWERUP || b->elements[i][j] == POWERDOWN || b->elements[i][j] == EMPTY)) // If its a number don't do recursion
+        {
+            return -1;
+        }
+        
+        FloodFill(i-1,j+1,col,hasBeenChecked,b);
+        FloodFill(i,j+1,col,hasBeenChecked,b);
+        FloodFill(i+1,j+1,col,hasBeenChecked,b);
+        FloodFill(i-1,j,col,hasBeenChecked,b);
+        FloodFill(i+1,j,col,hasBeenChecked,b);
+        FloodFill(i-1,j-1,col,hasBeenChecked,b);
+        FloodFill(i,j-1,col,hasBeenChecked,b);
+        FloodFill(i+1,j-1,col,hasBeenChecked,b);
+        
+    }
+    return -1;
+}
 
 // Remove this method and use FloodFill in its place
-void CheckSurroundingSpaces(int i, int j, bool col[BOARDSIZE][BOARDSIZE], Board * b) {
+/*void CheckSurroundingSpaces(int i, int j, bool col[BOARDSIZE][BOARDSIZE], Board * b) {
     //Checking top row
     if(j > 0) {
         //Checking top left 
@@ -305,7 +337,7 @@ void CheckSurroundingSpaces(int i, int j, bool col[BOARDSIZE][BOARDSIZE], Board 
             }
         }
     }
-}
+}*/
 
 // Adds all the Rectangle objects for the board,
 // Rectangle objects are necessary for registering
@@ -505,6 +537,7 @@ int main() {
             {
                 for(int j = 0;j<BOARDSIZE;j++)
                 {
+                    status = LOST;
                     collided[i][j] = true;
                     flagged[i][j] = false;
                 }
@@ -588,8 +621,8 @@ int main() {
                         RandomizeBoard(board, i, j);
                         firstClick = false;
                         collided[i][j] = true;
-                        //FloodFill(i,j,collided,hasBeenChecked,board);
-                        CheckSurroundingSpaces(i,j,collided,board);
+                        FloodFill(i,j,collided,hasBeenChecked,board);
+                        //CheckSurroundingSpaces(i,j,collided,board);
                     }
                 }
             }
@@ -603,8 +636,8 @@ int main() {
                         if(!flagged[i][j])
                         {
                             collided[i][j] = true;
-                            //FloodFill(i,j,collided,hasBeenChecked,board);
-                            CheckSurroundingSpaces(i,j,collided,board);
+                            FloodFill(i,j,collided,hasBeenChecked,board);
+                            //CheckSurroundingSpaces(i,j,collided,board);
                         }
                     }
                     else if(CheckCollisionPointRec(mouseLocation, tiles[i][j]) && IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
@@ -645,13 +678,13 @@ int main() {
                         DrawTexture(textures[10],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                     }
                 }
-                else if(collided[i][j] == true) // Draws the peices that exist beneath the (Fog of War)
+                else if(collided[i][j] == true) // Draws the peices that exist beneath the fog of war
                 {
                     if(board->elements[i][j] == BOMB){ // If any bomb is shown, the game instanstly loses
                         DrawTexture(textures[9],tiles[i][j].x + 1,tiles[i][j].y + 1, WHITE);
                         status = LOST;
                     }
-                    else if(board->elements[i][j] == POWERUP) // If powerup is shown, apply it and make that square EMPTY 
+                    else if(board->elements[i][j] == POWERUP && status != LOST) // If powerup is shown, apply it and make that square EMPTY 
                     {
                         bool addedFlag = ApplyPowerUp(board, flagged);
                         if(addedFlag)
@@ -665,7 +698,7 @@ int main() {
                         board->elements[i][j] = EMPTY;
                         FillBoard(board);
                     }
-                    else if(board->elements[i][j] == POWERDOWN) // If powerdown is shown, apply it and make that square EMPTY 
+                    else if(board->elements[i][j] == POWERDOWN && status != LOST) // If powerdown is shown, apply it and make that square EMPTY 
                     {
                         bool addedBomb = ApplyPowerDown(board, collided);
                         if(addedBomb)
